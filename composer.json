@@ -1,0 +1,44 @@
+{
+    "name": "bristol-su/portal-mail",
+    "description": "Email functionality through the portal",
+    "type": "library",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Toby Twigger",
+            "email": "tobytwigger1@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "ext-json": "*",
+        "bristol-su/support": "^5.0.0",
+        "bristol-su/control": "^3.0.1"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0",
+        "phpstan/phpstan": "^0.12.8",
+        "phpspec/prophecy-phpunit": "^2.0.0",
+        "brianium/paratest": "^6.0"
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": [],
+            "providers": [
+                "BristolSU\\Mail\\MailServiceProvider"
+            ]
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "BristolSU\\Mail\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "BristolSU\\Tests\\Mail\\": "tests/"
+        }
+    }
+}
