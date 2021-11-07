@@ -3,12 +3,10 @@
 namespace BristolSU\Mail;
 
 use Aws\Sdk;
-use BristolSU\Mail\Models\EmailAddress;
-use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
-class MailServiceProvider extends ServiceProvider implements DeferrableProvider
+class MailServiceProvider extends ServiceProvider
 {
 
     const VERSION = '3.6.0';
@@ -70,13 +68,4 @@ class MailServiceProvider extends ServiceProvider implements DeferrableProvider
 
     }
 
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return ['aws', 'Aws\Sdk'];
-    }
 }
