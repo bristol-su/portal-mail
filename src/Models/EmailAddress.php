@@ -29,11 +29,13 @@ class EmailAddress extends Model
             return 'AWS connection off';
         }
 
-        $sdk = app('aws')->createClient('ses');
-        $verifiedResult = $sdk->listVerifiedEmailAddresses();
-        $verified = $verifiedResult->hasKey('VerifiedEmailAddresses') ? $verifiedResult->get('VerifiedEmailAddresses') : [];
+        $verified = cache()->remember('portal_mail.verified_emails', 10, function() {
+            $sdk = app('aws')->createClient('ses');
+            $verifiedResult = $sdk->listVerifiedEmailAddresses();
+            return $verifiedResult->hasKey('VerifiedEmailAddresses') ? $verifiedResult->get('VerifiedEmailAddresses') : [];
+        });
 
-        if(!in_array($this->email, $verified)) {
+        if(in_array($this->email, $verified)) {
             return 'Verified';
         }
 
