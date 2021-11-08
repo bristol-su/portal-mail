@@ -22,7 +22,7 @@ class SendEmailRequest extends FormRequest
         return [
             'content' => 'required|string|max:9000000',
             'to' => 'required|array|min:1',
-            'to.*' => 'string|email:rfc,dns',
+            'to.*' => 'string',//|email:rfc,dns',
             'from' => ['required', 'integer', 'exists:portal_mail_email_addresses,id',
                 function ($attribute, $value, $fail) {
                     if(!EmailAddress::findOrFail($value)->currentUserCanAccess()) {
@@ -36,7 +36,9 @@ class SendEmailRequest extends FormRequest
             'bcc' => 'sometimes|nullable|array',
             'bcc.*' => 'string|email:rfc,dns',
             'attachments' => 'sometimes|nullable|array',
-            'type' => 'string|in:url,base64,file'
+            'type' => 'string|in:url,base64,file',
+            'notes' => 'sometimes|string|max:5000',
+            'via' => 'sometimes|string|in:inbox,integromat'
         ];
     }
 
@@ -55,7 +57,9 @@ class SendEmailRequest extends FormRequest
             ->setCc($this->input('cc') ?? [])
             ->setBcc($this->input('bcc') ?? [])
             ->setAttachments($this->input('attachments') ?? Arr::wrap($this->file('attachments') ?? []))
-            ->setType($this->input('type', 'file'));
+            ->setType($this->input('type', 'file'))
+            ->setNotes($this->input('notes', null))
+            ->setSentVia($this->input('via', 'api'));
     }
 
 }

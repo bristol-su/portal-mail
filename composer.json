@@ -17,7 +17,8 @@
         "bristol-su/support": "^5.0.0",
         "bristol-su/control": "^3.0.1",
         "aws/aws-sdk-php": "^3.200",
-        "ext-fileinfo": "*"
+        "ext-fileinfo": "*",
+        "binarybuilds/laravel-mail-manager": "^1.1"
     },
     "require-dev": {
         "orchestra/testbench": "^6.0",

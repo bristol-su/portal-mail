@@ -454,7 +454,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       }
 
       formData.append('subject', data.subject);
+      formData.append('notes', data.notes);
       formData.append('content', data.content);
+      formData.append('via', 'inbox');
       console.log(formData.forEach(function (value, key) {
         return console.log(value, key);
       }));
@@ -478,7 +480,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           id: e.id,
           value: e.email
         };
-      })).label('From').hint('Who to send the email from.').tooltip('This will appear as the address the email is sent from').required(true)).withField(this.$tools.generator.field.tags('to').label('To *').hint('Who to send the email to.').tooltip('You may enter multiple recipients by pressing enter.').required(false)).withField(this.$tools.generator.field.tags('cc').label('CC').hint('Who to cc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.tags('bcc').label('Bcc').hint('Who to bcc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.text('subject').label('Subject').hint('The subject of the message.').tooltip('This will appear as the subject on the email.').required(false)).withField(new _bristol_su_portal_ui_kit_src_generator_schema_Field__WEBPACK_IMPORTED_MODULE_0__["default"]('html', 'content').label('Content').hint('The body of the email').required(false)).withField(this.$tools.generator.field.file('attachments').label('Attachments').multiple(true).hint('Attachments for the email.').value([]).tooltip('You may select multiple files.').required(false));
+      })).label('From').hint('Who to send the email from.').tooltip('This will appear as the address the email is sent from').required(true)).withField(this.$tools.generator.field.tags('to').label('To *').hint('Who to send the email to.').tooltip('You may enter multiple recipients by pressing enter.').required(false)).withField(this.$tools.generator.field.tags('cc').label('CC').hint('Who to cc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.tags('bcc').label('Bcc').hint('Who to bcc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.text('subject').label('Subject').hint('The subject of the message.').tooltip('This will appear as the subject on the email.').required(false)).withField(this.$tools.generator.field.text('notes').label('Notes').hint('Notes to help you identify the email later.').tooltip('These notes aren\'t shown to the user, and will be kept private.').required(false)).withField(new _bristol_su_portal_ui_kit_src_generator_schema_Field__WEBPACK_IMPORTED_MODULE_0__["default"]('html', 'content').label('Content').hint('The body of the email').required(false)).withField(this.$tools.generator.field.file('attachments').label('Attachments').multiple(true).hint('Attachments for the email.').value([]).tooltip('You may select multiple files.').required(false));
     }
   }
 });

@@ -2,12 +2,13 @@
 
 namespace BristolSU\Mail\Mail;
 
+use BristolSU\Mail\Capture\Contracts\IsRecorded;
 use BristolSU\Mail\Mail\EmailPayload;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class GenericMailable extends Mailable
+class GenericMailable extends Mailable implements IsRecorded
 {
     use Queueable, SerializesModels;
 
@@ -62,5 +63,10 @@ class GenericMailable extends Mailable
     public static function forPayload(EmailPayload $emailPayload): static
     {
         return new static($emailPayload);
+    }
+
+    public function payload(): EmailPayload
+    {
+        return $this->emailPayload;
     }
 }

@@ -3,11 +3,10 @@
 namespace BristolSU\Mail\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Mail;
 
 class SendEmailJob
 {
@@ -30,11 +29,11 @@ class SendEmailJob
      *
      * @return void
      */
-    public function handle()
+    public function handle(Mailer $mailer)
     {
         $mailable = GenericMailable::forPayload($this->payload);
 
-        Mail::send($mailable);
+        $mailer->send($mailable);
     }
 
 }

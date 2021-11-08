@@ -3,8 +3,10 @@
 namespace BristolSU\Mail\Mail;
 
 use BristolSU\Mail\Models\EmailAddress;
+use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Contracts\Support\Jsonable;
 
-class EmailPayload
+class EmailPayload implements Jsonable, Arrayable
 {
 
     private string $content;
@@ -23,6 +25,10 @@ class EmailPayload
 
     private string $type = 'file';
 
+    private ?string $notes = null;
+
+    private string $sentVia = 'system';
+
     public function __construct(
         string $content, array $to, EmailAddress $from
     )
@@ -33,110 +39,38 @@ class EmailPayload
     }
 
     /**
-     * @return string
-     */
-    public function getContent(): string
-    {
-        return $this->content;
-    }
-
-    /**
-     * @param string $content
-     * @return EmailPayload
-     */
-    public function setContent(string $content): EmailPayload
-    {
-        $this->content = $content;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getTo(): array
-    {
-        return $this->to;
-    }
-
-    /**
-     * @param array $to
-     * @return EmailPayload
-     */
-    public function setTo(array $to): EmailPayload
-    {
-        $this->to = $to;
-        return $this;
-    }
-
-    /**
-     * @return EmailAddress
-     */
-    public function getFrom(): EmailAddress
-    {
-        return $this->from;
-    }
-
-    /**
-     * @param EmailAddress $from
-     * @return EmailPayload
-     */
-    public function setFrom(EmailAddress $from): EmailPayload
-    {
-        $this->from = $from;
-        return $this;
-    }
-
-    /**
      * @return string|null
      */
-    public function getSubject(): ?string
+    public function getNotes(): ?string
     {
-        return $this->subject;
+        return $this->notes;
     }
 
     /**
-     * @param string|null $subject
+     * @param string|null $notes
      * @return EmailPayload
      */
-    public function setSubject(?string $subject): EmailPayload
+    public function setNotes(?string $notes): EmailPayload
     {
-        $this->subject = $subject;
+        $this->notes = $notes;
         return $this;
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getCc(): array
+    public function getSentVia(): string
     {
-        return $this->cc;
+        return $this->sentVia;
     }
 
     /**
-     * @param array $cc
+     * @param string $sentVia
      * @return EmailPayload
      */
-    public function setCc(array $cc): EmailPayload
+    public function setSentVia(string $sentVia): EmailPayload
     {
-        $this->cc = $cc;
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getBcc(): array
-    {
-        return $this->bcc;
-    }
-
-    /**
-     * @param array $bcc
-     * @return EmailPayload
-     */
-    public function setBcc(array $bcc): EmailPayload
-    {
-        $this->bcc = $bcc;
+        $this->sentVia = $sentVia;
         return $this;
     }
 
@@ -196,4 +130,135 @@ class EmailPayload
         return !empty($this->attachments);
     }
 
+    public function __toString(): string
+    {
+        return $this->toJson();
+    }
+
+    public function toJson($options = 0): string
+    {
+        return json_encode($this->toArray(), $options);
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'to' => $this->getTo(),
+            'cc' => $this->getCc(),
+            'bcc' => $this->getBcc(),
+            'subject' => $this->getSubject(),
+            'content' => $this->getContent(),
+            'from' => $this->getFrom()->id,
+//            'attachments' => '',
+//            'type' => ''
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getTo(): array
+    {
+        return $this->to;
+    }
+
+    /**
+     * @param array $to
+     * @return EmailPayload
+     */
+    public function setTo(array $to): EmailPayload
+    {
+        $this->to = $to;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCc(): array
+    {
+        return $this->cc;
+    }
+
+    /**
+     * @param array $cc
+     * @return EmailPayload
+     */
+    public function setCc(array $cc): EmailPayload
+    {
+        $this->cc = $cc;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getBcc(): array
+    {
+        return $this->bcc;
+    }
+
+    /**
+     * @param array $bcc
+     * @return EmailPayload
+     */
+    public function setBcc(array $bcc): EmailPayload
+    {
+        $this->bcc = $bcc;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSubject(): ?string
+    {
+        return $this->subject;
+    }
+
+    /**
+     * @param string|null $subject
+     * @return EmailPayload
+     */
+    public function setSubject(?string $subject): EmailPayload
+    {
+        $this->subject = $subject;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getContent(): string
+    {
+        return $this->content;
+    }
+
+    /**
+     * @param string $content
+     * @return EmailPayload
+     */
+    public function setContent(string $content): EmailPayload
+    {
+        $this->content = $content;
+        return $this;
+    }
+
+    /**
+     * @return EmailAddress
+     */
+    public function getFrom(): EmailAddress
+    {
+        return $this->from;
+    }
+
+    /**
+     * @param EmailAddress $from
+     * @return EmailPayload
+     */
+    public function setFrom(EmailAddress $from): EmailPayload
+    {
+        $this->from = $from;
+        return $this;
+    }
 }

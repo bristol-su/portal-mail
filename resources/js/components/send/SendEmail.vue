@@ -38,7 +38,9 @@ export default {
                 formData.append('bcc[]', e);
             }
             formData.append('subject', data.subject);
+            formData.append('notes', data.notes);
             formData.append('content', data.content);
+            formData.append('via', 'inbox');
 
             console.log(formData.forEach((value, key) => console.log(value, key)));
             this.$httpBasic.post('/mail/send', formData, {name: 'sending-email', headers: {'Content-Type': 'multipart/form-data'}})
@@ -86,6 +88,11 @@ export default {
                     .label('Subject')
                     .hint('The subject of the message.')
                     .tooltip('This will appear as the subject on the email.')
+                    .required(false)
+                ).withField(this.$tools.generator.field.text('notes')
+                    .label('Notes')
+                    .hint('Notes to help you identify the email later.')
+                    .tooltip('These notes aren\'t shown to the user, and will be kept private.')
                     .required(false)
                 ).withField((new Field('html', 'content'))
                     .label('Content')
