@@ -22,6 +22,14 @@ class MailServiceProvider extends ServiceProvider
         $this->registerRoutes();
         $this->registerAssets();
         $this->registerAws();
+        $this->registerCommands();
+    }
+
+    public function registerCommands()
+    {
+        $this->commands([
+            \BristolSU\Mail\Commands\SyncEmailAddressesCommand::class
+        ]);
     }
 
     public function registerAws()
