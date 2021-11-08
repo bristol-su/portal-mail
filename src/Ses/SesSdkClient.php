@@ -54,7 +54,7 @@ class SesSdkClient implements SesClient
     public function isDomainVerified(string $domain): bool
     {
         $attributes = $this->getDomainAttributes($domain);
-        return !empty($attributes) && $attributes['DkimVerificationStatus'] === 'True';
+        return !empty($attributes) && $attributes['DkimVerificationStatus'] === 'Success';
     }
 
     public function getDkimTokens(string $domain): array
