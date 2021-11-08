@@ -29,6 +29,8 @@
             </template>
         </p-table>
 
+        <h1>Domains</h1>
+
         <p-table
             :busy="$isLoading('get-domains')"
             :columns="domainFields"
@@ -94,13 +96,14 @@ export default {
                         .then(response => {
                             this.$ui.notify.success('Email deleted');
                             this.removedEmails.push(address.id);
+                            this.refreshDomains();
                         })
                 })
         },
         addEmail(email) {
             this.newEmails.push(email);
-            this.refreshDomains();
             this.$ui.modal.hide('add-email');
+            this.refreshDomains();
         },
         verifyEmail(address) {
             this.$httpBasic.post('/mail/address/' + address.id + '/verification')

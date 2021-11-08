@@ -219,6 +219,8 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 //
 //
 //
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "ViewAddresses",
@@ -276,13 +278,15 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
           _this.$ui.notify.success('Email deleted');
 
           _this.removedEmails.push(address.id);
+
+          _this.refreshDomains();
         });
       });
     },
     addEmail: function addEmail(email) {
       this.newEmails.push(email);
-      this.refreshDomains();
       this.$ui.modal.hide('add-email');
+      this.refreshDomains();
     },
     verifyEmail: function verifyEmail(address) {
       var _this2 = this;
@@ -1270,6 +1274,8 @@ var render = function () {
           },
         ]),
       }),
+      _vm._v(" "),
+      _c("h1", [_vm._v("Domains")]),
       _vm._v(" "),
       _c("p-table", {
         attrs: {
