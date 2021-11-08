@@ -22,11 +22,6 @@ class Domain extends Model
         'domain'
     ];
 
-    public static function getDomainFromEmail(string $email): string
-    {
-        return explode('@', $email)[1];
-    }
-
     public function getDnsRecordsAttribute()
     {
         if(!$this->id || config('portal_mail.enable_aws', true) === false) {
@@ -37,14 +32,13 @@ class Domain extends Model
         $ses = app('portal-mail-ses');
         $identities = $ses->getIdentityDkimAttributes(['Identities' => [$this->domain]])->get('DkimAttributes');
         if(array_key_exists($this->domain, $identities)) {
-            return $identities[$this->domain]['DkimTokens'];
+            $tokens = $identities[$this->domain]['DkimTokens'];
+        } else {
+            $tokens = $ses->verifyDomainDkim(['Domain' => $this->domain])->get('DkimTokens');
         }
-        $tokens = $ses->verifyDomainDkim(['Domain' => $this->domain])->get('DkimTokens');
         $records = [];
         foreach($tokens as $token) {
-            $records[] = [
-                sprintf('%s._domainkey.%s', $token, $this->domain) => sprintf('%s.dkim.amazonses.com', $token)
-            ];
+            $records[sprintf('%s._domainkey.%s', $token, $this->domain)] = sprintf('%s.dkim.amazonses.com', $token);
         }
 
         return $records;

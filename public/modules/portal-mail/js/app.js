@@ -153,6 +153,18 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 //
 //
 //
@@ -219,12 +231,6 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       "default": function _default() {
         return [];
       }
-    },
-    domains: {
-      type: Array,
-      "default": function _default() {
-        return [];
-      }
     }
   },
   data: function data() {
@@ -236,10 +242,28 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
         key: 'status',
         label: 'Status'
       }],
-      domainFields: [],
+      domainFields: [{
+        key: 'domain',
+        label: 'Domain'
+      }, {
+        key: 'status',
+        label: 'Status'
+      }],
+      viewingDomainFields: [{
+        key: 'name',
+        label: 'CNAME Name'
+      }, {
+        key: 'value',
+        label: 'CNAME Value'
+      }],
       newEmails: [],
-      removedEmails: []
+      removedEmails: [],
+      domains: [],
+      viewingDomain: null
     };
+  },
+  mounted: function mounted() {
+    this.refreshDomains();
   },
   methods: {
     deleteAddress: function deleteAddress(address) {
@@ -257,6 +281,7 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
     },
     addEmail: function addEmail(email) {
       this.newEmails.push(email);
+      this.refreshDomains();
       this.$ui.modal.hide('add-email');
     },
     verifyEmail: function verifyEmail(address) {
@@ -265,21 +290,51 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
       this.$httpBasic.post('/mail/address/' + address.id + '/verification').then(function (response) {
         return _this2.$ui.notify.success('Verification email sent');
       })["catch"](function (error) {
-        return _this2.$ui.notify.error('Verification email not sent: ' + error.message);
+        return _this2.$ui.notify.alert('Verification email not sent: ' + error.message);
       });
     },
-    verifyDomain: function verifyDomain(domain) {}
+    viewDomain: function viewDomain(domain) {
+      this.viewingDomain = domain;
+      this.$ui.modal.show('view-cname');
+    },
+    refreshDomains: function refreshDomains() {
+      var _this3 = this;
+
+      this.$httpBasic.get('/mail/domains', {
+        name: 'get-domains'
+      }).then(function (response) {
+        return _this3.domains = response.data;
+      })["catch"](function (error) {
+        return _this3.$ui.notify.alert('Could not refresh the domain: ' + error.message);
+      });
+    },
+    getDnsDetails: function getDnsDetails(dnsRecords) {
+      var details = [];
+
+      for (var _i = 0, _Object$entries = Object.entries(dnsRecords); _i < _Object$entries.length; _i++) {
+        var _Object$entries$_i = _slicedToArray(_Object$entries[_i], 2),
+            recordName = _Object$entries$_i[0],
+            recordValue = _Object$entries$_i[1];
+
+        details.push({
+          name: recordName,
+          value: recordValue
+        });
+      }
+
+      return details;
+    }
   },
   computed: {
     emailAddresses: function emailAddresses() {
-      var _this3 = this;
+      var _this4 = this;
 
       return _.cloneDeep(this.emails).concat(this.newEmails).filter(function (email) {
-        return !_this3.removedEmails.includes(email.id);
+        return !_this4.removedEmails.includes(email.id);
       }).map(function (email) {
         return _objectSpread(_objectSpread({}, email), {}, {
           _table: {
-            isDeleting: _this3.$isLoading('delete-email-address-' + email.id)
+            isDeleting: _this4.$isLoading('delete-email-address-' + email.id)
           }
         });
       });
@@ -1108,6 +1163,7 @@ var render = function () {
         attrs: {
           columns: _vm.emailTableFields,
           items: _vm.emailAddresses,
+          actions: true,
           deletable: true,
         },
         on: { delete: _vm.deleteAddress },
@@ -1216,115 +1272,47 @@ var render = function () {
       }),
       _vm._v(" "),
       _c("p-table", {
-        attrs: { columns: _vm.domainFields, items: _vm.domains, actions: true },
-        scopedSlots: _vm._u([
-          {
-            key: "actions",
-            fn: function (ref) {
-              var row = ref.row
-              return [
-                row.status === "Waiting for Verification"
-                  ? _c(
-                      "a",
-                      {
-                        staticClass: "text-primary hover:text-primary-dark",
-                        attrs: { href: "#" },
-                        on: {
-                          click: function ($event) {
-                            return _vm.verifyDomain(row)
-                          },
-                          keydown: [
-                            function ($event) {
-                              if (
-                                !$event.type.indexOf("key") &&
-                                _vm._k(
-                                  $event.keyCode,
-                                  "space",
-                                  32,
-                                  $event.key,
-                                  [" ", "Spacebar"]
-                                )
-                              ) {
-                                return null
-                              }
-                              $event.preventDefault()
-                              return _vm.verifyDomain(row)
-                            },
-                            function ($event) {
-                              if (
-                                !$event.type.indexOf("key") &&
-                                _vm._k(
-                                  $event.keyCode,
-                                  "enter",
-                                  13,
-                                  $event.key,
-                                  "Enter"
-                                )
-                              ) {
-                                return null
-                              }
-                              $event.preventDefault()
-                              return _vm.verifyDomain(row)
-                            },
-                          ],
-                        },
-                      },
-                      [
-                        _c(
-                          "svg",
-                          {
-                            directives: [
-                              {
-                                name: "tippy",
-                                rawName: "v-tippy",
-                                value: {
-                                  arrow: true,
-                                  animation: "fade",
-                                  placement: "top-start",
-                                  arrow: true,
-                                  interactive: true,
-                                },
-                                expression:
-                                  "{ arrow: true, animation: 'fade', placement: 'top-start', arrow: true, interactive: true}",
-                              },
-                            ],
-                            staticClass: "h-6 w-6",
-                            attrs: {
-                              xmlns: "http://www.w3.org/2000/svg",
-                              fill: "none",
-                              viewBox: "0 0 24 24",
-                              stroke: "currentColor",
-                              content: "Set up domain verification details",
-                            },
-                          },
-                          [
-                            _c("path", {
-                              attrs: {
-                                "stroke-linecap": "round",
-                                "stroke-linejoin": "round",
-                                "stroke-width": "2",
-                                d: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15",
-                              },
-                            }),
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c("span", { staticClass: "sr-only" }, [
-                          _vm._v("Set up DNS records"),
-                        ]),
-                      ]
-                    )
-                  : _vm._e(),
-              ]
-            },
-          },
-        ]),
+        attrs: {
+          busy: _vm.$isLoading("get-domains"),
+          columns: _vm.domainFields,
+          items: _vm.domains,
+          viewable: true,
+        },
+        on: { view: _vm.viewDomain },
       }),
       _vm._v(" "),
       _c(
         "p-modal",
         { attrs: { id: "add-email", title: "Add email address" } },
         [_c("add-address", { on: { added: _vm.addEmail } })],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "p-modal",
+        {
+          attrs: { id: "view-cname", title: "View DNS Records" },
+          on: {
+            hide: function ($event) {
+              _vm.viewingDomain = null
+            },
+          },
+        },
+        [
+          _vm._v(
+            "\n        The following CNAME records should be created for the domain " +
+              _vm._s(_vm.viewingDomain ? _vm.viewingDomain.domain : "N/A") +
+              "\n        "
+          ),
+          _vm.viewingDomain
+            ? _c("p-table", {
+                attrs: {
+                  columns: _vm.viewingDomainFields,
+                  items: _vm.getDnsDetails(_vm.viewingDomain.dns_records),
+                },
+              })
+            : _vm._e(),
+        ],
         1
       ),
     ],

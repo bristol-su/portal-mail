@@ -7,7 +7,7 @@
     <p-page-content title="Available email addresses"
                     subtitle="Manage the email addresses that can be used for sending">
 
-        <view-addresses :emails="{{$emails}}" :domains="{{$domains}}">
+        <view-addresses :emails="{{$emails}}">
 
         </view-addresses>
     </p-page-content>

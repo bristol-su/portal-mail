@@ -15,7 +15,7 @@ class EmailAddress extends Model
 
     protected $table = 'portal_mail_email_addresses';
 
-    protected $appends = ['status'];
+    protected $appends = ['status', 'domain'];
 
     protected $fillable = [
         'email'
@@ -48,6 +48,11 @@ class EmailAddress extends Model
         return 'Waiting for Verification';
     }
 
+    public function getDomainAttribute()
+    {
+        return explode('@', $this->email)[1];
+    }
+
     protected static function booted()
     {
         static::deleted(function(EmailAddress $model) {
@@ -63,14 +68,14 @@ class EmailAddress extends Model
         });
 
         static::deleted(function(EmailAddress $model) {
-            $domain = Domain::getDomainFromEmail($model->email);
+            $domain = $model->domain;
             if(!Domain::where('domain', $domain)->exists() && EmailAddress::where('domain', 'LIKE', '%@' . $domain . '%')->count() > 0) {
                 Domain::where(['domain' => $domain])->delete();
             }
         });
 
         static::created(function(EmailAddress $model) {
-            $domain = Domain::getDomainFromEmail($model->email);
+            $domain = $model->domain;
             if(!Domain::where('domain', $domain)->exists()) {
                 Domain::create(['domain' => $domain]);
             }

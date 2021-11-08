@@ -14,6 +14,7 @@
         <p-table
             :columns="emailTableFields"
             :items="emailAddresses"
+            :actions="true"
             :deletable="true"
             @delete="deleteAddress">
             <template #actions="{row}">
@@ -29,25 +30,24 @@
         </p-table>
 
         <p-table
+            :busy="$isLoading('get-domains')"
             :columns="domainFields"
             :items="domains"
-            :actions="true">
-            <template #actions="{row}">
-                <a href="#" @click="verifyDomain(row)" v-if="row.status === 'Waiting for Verification'" @keydown.space.prevent="verifyDomain(row)" @keydown.enter.prevent="verifyDomain(row)" class="text-primary hover:text-primary-dark">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                         content="Set up domain verification details"
-                         v-tippy="{ arrow: true, animation: 'fade', placement: 'top-start', arrow: true, interactive: true}">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    <span class="sr-only">Set up DNS records</span>
-                </a>
-            </template>
+            :viewable="true"
+            @view="viewDomain">
         </p-table>
 
         <p-modal id="add-email" title="Add email address">
             <add-address @added="addEmail">
 
             </add-address>
+        </p-modal>
+
+        <p-modal id="view-cname" title="View DNS Records" @hide="viewingDomain = null">
+            The following CNAME records should be created for the domain {{viewingDomain ? viewingDomain.domain : 'N/A'}}
+            <p-table v-if="viewingDomain" :columns="viewingDomainFields" :items="getDnsDetails(viewingDomain.dns_records)">
+
+            </p-table>
         </p-modal>
     </div>
 </template>
@@ -61,10 +61,6 @@ export default {
         emails: {
             type: Array,
             default: () => []
-        },
-        domains: {
-            type: Array,
-            default: () => []
         }
     },
     data() {
@@ -74,11 +70,21 @@ export default {
                 {key: 'status', label: 'Status'},
             ],
             domainFields: [
-
+                {key: 'domain', label: 'Domain'},
+                {key: 'status', label: 'Status'}
+            ],
+            viewingDomainFields: [
+                {key: 'name', label: 'CNAME Name'},
+                {key: 'value', label: 'CNAME Value'}
             ],
             newEmails: [],
-            removedEmails: []
+            removedEmails: [],
+            domains: [],
+            viewingDomain: null
         }
+    },
+    mounted() {
+        this.refreshDomains();
     },
     methods: {
         deleteAddress(address) {
@@ -93,15 +99,32 @@ export default {
         },
         addEmail(email) {
             this.newEmails.push(email);
+            this.refreshDomains();
             this.$ui.modal.hide('add-email');
         },
         verifyEmail(address) {
             this.$httpBasic.post('/mail/address/' + address.id + '/verification')
                 .then(response => this.$ui.notify.success('Verification email sent'))
-                .catch(error => this.$ui.notify.error('Verification email not sent: ' + error.message));
+                .catch(error => this.$ui.notify.alert('Verification email not sent: ' + error.message));
         },
-        verifyDomain(domain) {
-
+        viewDomain(domain) {
+            this.viewingDomain = domain;
+            this.$ui.modal.show('view-cname');
+        },
+        refreshDomains() {
+            this.$httpBasic.get('/mail/domains', {name: 'get-domains'})
+                .then(response => this.domains = response.data)
+                .catch(error => this.$ui.notify.alert('Could not refresh the domain: ' + error.message));
+        },
+        getDnsDetails(dnsRecords) {
+            let details = [];
+            for (const [recordName, recordValue] of Object.entries(dnsRecords)) {
+                details.push({
+                    name: recordName,
+                    value: recordValue
+                })
+            }
+            return details;
         }
     },
     computed: {

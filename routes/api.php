@@ -6,3 +6,4 @@ Route::apiResource('address', \BristolSU\Mail\Http\Controllers\Api\EmailAddressC
 Route::apiResource('user', \BristolSU\Mail\Http\Controllers\Api\EmailAddressUserController::class)->only('update');
 Route::post('address/{emailAddress}/verification', [\BristolSU\Mail\Http\Controllers\Api\EmailAddressVerificationController::class, 'sendVerificationLink']);
 Route::post('send', [\BristolSU\Mail\Http\Controllers\Api\EmailController::class, 'send']);
+Route::get('domains', [\BristolSU\Mail\Http\Controllers\Api\DomainController::class, 'index']);

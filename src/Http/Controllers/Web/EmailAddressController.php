@@ -11,12 +11,8 @@ class EmailAddressController
 
     public function index()
     {
-        /** @var SesClient $ses */
-        $ses = app('portal-mail-ses');
-        dd($ses->getIdentityDkimAttributes(['Identities' => ['hotmail.co.uk']]));
         return view('portal-mail::address', [
-            'emails' => EmailAddress::all(),
-            'domains' => Domain::all()
+            'emails' => EmailAddress::all()
         ]);
     }
 
