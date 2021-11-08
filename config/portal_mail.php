@@ -12,5 +12,5 @@ return [
             'L5MOD/' . \BristolSU\Mail\MailServiceProvider::VERSION,
         ],
     ],
-    'enable_aws' => env('ENABLE_AWS_EMAIL_VERIFICATION', true)
+    'enable_aws' => env('MAIL_DRIVER', 'array') === 'ses'
 ];

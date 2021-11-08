@@ -9,9 +9,9 @@ use Illuminate\Routing\Controller;
 class EmailAddressVerificationController extends Controller
 {
 
-    public function sendVerificationLink(EmailAddress $emailAddress, Sdk $sdk)
+    public function sendVerificationLink(EmailAddress $emailAddress,)
     {
-        $ses = $sdk->createClient('ses');
+        $ses = app('portal-mail-ses');
         $ses->deleteIdentity(['Identity' => $emailAddress->email]);
         $ses->verifyEmailIdentity(['EmailAddress' => $emailAddress->email]);
 

@@ -2,6 +2,7 @@
 
 namespace BristolSU\Mail\Models;
 
+use Aws\Ses\SesClient;
 use BristolSU\ControlDB\Contracts\Models\User;
 use BristolSU\Database\Mail\Factories\EmailAddressFactory;
 use BristolSU\Support\Authentication\Contracts\Authentication;
@@ -9,21 +10,44 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EmailAddress extends Model
+class Domain extends Model
 {
     use HasFactory;
 
-    protected $table = 'portal_mail_email_addresses';
+    protected $table = 'portal_mail_domains';
 
-    protected $appends = ['status'];
+    protected $appends = ['status', 'dns_records'];
 
     protected $fillable = [
-        'email'
+        'domain'
     ];
 
-    public function emailAddressUser()
+    public static function getDomainFromEmail(string $email): string
     {
-        return $this->hasMany(EmailAddressUser::class);
+        return explode('@', $email)[1];
+    }
+
+    public function getDnsRecordsAttribute()
+    {
+        if(!$this->id || config('portal_mail.enable_aws', true) === false) {
+            return [];
+        }
+
+        /** @var SesClient $ses */
+        $ses = app('portal-mail-ses');
+        $identities = $ses->getIdentityDkimAttributes(['Identities' => [$this->domain]])->get('DkimAttributes');
+        if(array_key_exists($this->domain, $identities)) {
+            return $identities[$this->domain]['DkimTokens'];
+        }
+        $tokens = $ses->verifyDomainDkim(['Domain' => $this->domain])->get('DkimTokens');
+        $records = [];
+        foreach($tokens as $token) {
+            $records[] = [
+                sprintf('%s._domainkey.%s', $token, $this->domain) => sprintf('%s.dkim.amazonses.com', $token)
+            ];
+        }
+
+        return $records;
     }
 
     public function getStatusAttribute()
@@ -37,7 +61,7 @@ class EmailAddress extends Model
 
         $verified = cache()->remember('portal_mail.verified_emails', 10, function() {
             $sdk = app('portal-mail-ses');
-            $verifiedResult = $sdk->listVerifiedEmailAddresses();
+            $verifiedResult = $sdk->getIdentityDkimAttributes(['Identities' => [$this->domain]]);
             return $verifiedResult->hasKey('VerifiedEmailAddresses') ? $verifiedResult->get('VerifiedEmailAddresses') : [];
         });
 
@@ -51,40 +75,18 @@ class EmailAddress extends Model
     protected static function booted()
     {
         static::deleted(function(EmailAddress $model) {
+            // ToDO trigger to delete identity
             if(config('portal_mail.enable_aws', true)) {
                 app('portal-mail-ses')->deleteIdentity(['Identity' => $model->email]);
             }
         });
 
         static::created(function(EmailAddress $model) {
+            // TODO trigger aws to get cname details
             if(config('portal_mail.enable_aws', false)) {
                 app('portal-mail-ses')->verifyEmailIdentity(['EmailAddress' => $model->email]);
             }
         });
-
-        static::deleted(function(EmailAddress $model) {
-            $domain = Domain::getDomainFromEmail($model->email);
-            if(!Domain::where('domain', $domain)->exists() && EmailAddress::where('domain', 'LIKE', '%@' . $domain . '%')->count() > 0) {
-                Domain::where(['domain' => $domain])->delete();
-            }
-        });
-
-        static::created(function(EmailAddress $model) {
-            $domain = Domain::getDomainFromEmail($model->email);
-            if(!Domain::where('domain', $domain)->exists()) {
-                Domain::create(['domain' => $domain]);
-            }
-        });
-    }
-
-    public function currentUserCanAccess(): bool
-    {
-        return $this->emailAddressUser()->where('user_id', app(Authentication::class)->getUser()->id())->exists();
-    }
-
-    public function scopeForUser(Builder $query, User $user)
-    {
-        return $query->whereHas('emailAddressUser', fn(Builder $query) => $query->where('user_id', $user->id()));
     }
 
     protected static function newFactory()

@@ -2,27 +2,22 @@
 
 namespace BristolSU\Mail\Http\Controllers\Web;
 
-use Aws\Sdk;
 use Aws\Ses\SesClient;
+use BristolSU\Mail\Models\Domain;
 use BristolSU\Mail\Models\EmailAddress;
 
 class EmailAddressController
 {
 
-    public function index(Sdk $sdk)
+    public function index()
     {
         /** @var SesClient $ses */
-        $ses = $sdk->createClient('ses');
-
-//        dd($ses->listIdentities());
+        $ses = app('portal-mail-ses');
+        dd($ses->getIdentityDkimAttributes(['Identities' => ['hotmail.co.uk']]));
         return view('portal-mail::address', [
-            'emails' => EmailAddress::all()
+            'emails' => EmailAddress::all(),
+            'domains' => Domain::all()
         ]);
-    }
-
-    public function store()
-    {
-
     }
 
 }

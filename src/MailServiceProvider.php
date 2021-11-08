@@ -23,12 +23,15 @@ class MailServiceProvider extends ServiceProvider
 
     public function registerAws()
     {
-        $this->app->singleton('aws', function ($app) {
+        $this->app->singleton('portal-mail-aws', function ($app) {
             return new Sdk(
                 $app->make('config')->get('portal_mail.aws')
             );
         });
-        $this->app->alias('aws', 'Aws\Sdk');
+
+        $this->app->singleton('portal-mail-ses', function($app) {
+            return $app->make('portal-mail-aws')->createClient('ses');
+        });
     }
 
     public function registerConfig()

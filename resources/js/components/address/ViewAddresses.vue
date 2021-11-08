@@ -28,6 +28,22 @@
             </template>
         </p-table>
 
+        <p-table
+            :columns="domainFields"
+            :items="domains"
+            :actions="true">
+            <template #actions="{row}">
+                <a href="#" @click="verifyDomain(row)" v-if="row.status === 'Waiting for Verification'" @keydown.space.prevent="verifyDomain(row)" @keydown.enter.prevent="verifyDomain(row)" class="text-primary hover:text-primary-dark">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                         content="Set up domain verification details"
+                         v-tippy="{ arrow: true, animation: 'fade', placement: 'top-start', arrow: true, interactive: true}">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    <span class="sr-only">Set up DNS records</span>
+                </a>
+            </template>
+        </p-table>
+
         <p-modal id="add-email" title="Add email address">
             <add-address @added="addEmail">
 
@@ -43,7 +59,10 @@ export default {
     components: {AddAddress},
     props: {
         emails: {
-            required: true,
+            type: Array,
+            default: () => []
+        },
+        domains: {
             type: Array,
             default: () => []
         }
@@ -53,6 +72,9 @@ export default {
             emailTableFields: [
                 {key: 'email', label: 'Email Address'},
                 {key: 'status', label: 'Status'},
+            ],
+            domainFields: [
+
             ],
             newEmails: [],
             removedEmails: []
@@ -77,6 +99,9 @@ export default {
             this.$httpBasic.post('/mail/address/' + address.id + '/verification')
                 .then(response => this.$ui.notify.success('Verification email sent'))
                 .catch(error => this.$ui.notify.error('Verification email not sent: ' + error.message));
+        },
+        verifyDomain(domain) {
+
         }
     },
     computed: {
