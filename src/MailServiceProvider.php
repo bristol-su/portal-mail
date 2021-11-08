@@ -3,6 +3,9 @@
 namespace BristolSU\Mail;
 
 use Aws\Sdk;
+use BristolSU\Mail\Ses\DisabledClient;
+use BristolSU\Mail\Ses\SesClient;
+use BristolSU\Mail\Ses\SesSdkClient;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,8 +32,11 @@ class MailServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton('portal-mail-ses', function($app) {
-            return $app->make('portal-mail-aws')->createClient('ses');
+        $this->app->singleton(SesClient::class, function($app) {
+            if($app->make('config')->get('portal_mail.enable_aws', true)) {
+                return $app->make(SesSdkClient::class);
+            }
+            return $app->make(DisabledClient::class);
         });
     }
 

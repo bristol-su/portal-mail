@@ -4,6 +4,7 @@ namespace BristolSU\Mail\Models;
 
 use BristolSU\ControlDB\Contracts\Models\User;
 use BristolSU\Database\Mail\Factories\EmailAddressFactory;
+use BristolSU\Mail\Ses\Ses;
 use BristolSU\Support\Authentication\Contracts\Authentication;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,17 +32,12 @@ class EmailAddress extends Model
         if(!$this->id) {
             return 'N/A';
         }
-        if(config('portal_mail.enable_aws', true) === false) {
+        
+        if(!Ses::isAwsEnabled()) {
             return 'AWS connection off';
         }
 
-        $verified = cache()->remember('portal_mail.verified_emails', 10, function() {
-            $sdk = app('portal-mail-ses');
-            $verifiedResult = $sdk->listVerifiedEmailAddresses();
-            return $verifiedResult->hasKey('VerifiedEmailAddresses') ? $verifiedResult->get('VerifiedEmailAddresses') : [];
-        });
-
-        if(in_array($this->email, $verified)) {
+        if(Ses::isEmailVerified($this->email)) {
             return 'Verified';
         }
 
@@ -56,14 +52,14 @@ class EmailAddress extends Model
     protected static function booted()
     {
         static::deleted(function(EmailAddress $model) {
-            if(config('portal_mail.enable_aws', true)) {
-                app('portal-mail-ses')->deleteIdentity(['Identity' => $model->email]);
+            if(Ses::isAwsEnabled()) {
+                Ses::deleteEmail($model->email);
             }
         });
 
         static::created(function(EmailAddress $model) {
-            if(config('portal_mail.enable_aws', false)) {
-                app('portal-mail-ses')->verifyEmailIdentity(['EmailAddress' => $model->email]);
+            if(Ses::isAwsEnabled()) {
+                Ses::addEmail($model->email);
             }
         });
 
