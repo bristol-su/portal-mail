@@ -22,6 +22,11 @@ class EmailAddress extends Model
         'email'
     ];
 
+    public function scopeWhereDomain(Builder $query, string $domain)
+    {
+        $query->where('email', 'LIKE', '%@' . $domain . '%');
+    }
+
     public function emailAddressUser()
     {
         return $this->hasMany(EmailAddressUser::class);
@@ -32,7 +37,7 @@ class EmailAddress extends Model
         if(!$this->id) {
             return 'N/A';
         }
-        
+
         if(!Ses::isAwsEnabled()) {
             return 'AWS connection off';
         }
@@ -58,22 +63,20 @@ class EmailAddress extends Model
         });
 
         static::created(function(EmailAddress $model) {
-            if(Ses::isAwsEnabled()) {
+            if(Ses::isAwsEnabled() && !Ses::isEmailVerified($model->email)) {
                 Ses::addEmail($model->email);
             }
         });
 
         static::deleted(function(EmailAddress $model) {
-            $domain = $model->domain;
-            if(!Domain::where('domain', $domain)->exists() && EmailAddress::where('domain', 'LIKE', '%@' . $domain . '%')->count() > 0) {
-                Domain::where(['domain' => $domain])->delete();
+            if(Domain::where('domain', $model->domain)->exists() && EmailAddress::whereDomain($model->domain)->count() === 0) {
+                Domain::where('domain', $model->domain)->delete();
             }
         });
 
         static::created(function(EmailAddress $model) {
-            $domain = $model->domain;
-            if(!Domain::where('domain', $domain)->exists()) {
-                Domain::create(['domain' => $domain]);
+            if(!Domain::where('domain', $model->domain)->exists()) {
+                Domain::create(['domain' => $model->domain]);
             }
         });
     }
