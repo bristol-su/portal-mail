@@ -10,11 +10,13 @@ use BristolSU\Mail\Capture\Listeners\MailFailedListener;
 use BristolSU\Mail\Capture\Listeners\MailSendingListener;
 use BristolSU\Mail\Capture\Listeners\MailSentListener;
 use BristolSU\Mail\Capture\MailManager;
+use BristolSU\Mail\Models\EmailAddressUser;
 use BristolSU\Mail\Ses\DisabledClient;
 use BristolSU\Mail\Ses\SesClient;
 use BristolSU\Mail\Ses\SesSdkClient;
 use BristolSU\Support\Action\Facade\ActionManager;
 use BristolSU\Support\Authentication\Contracts\Authentication;
+use BristolSU\Support\Permissions\Facade\Permission;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Contracts\Mail\Factory;
 use Illuminate\Mail\Events\MessageSending;
@@ -45,6 +47,12 @@ class MailServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerAction();
+        $this->registerPermissions();
+    }
+
+    public function registerPermissions()
+    {
+        Permission::registerSitePermission('manage-mail', 'Manage Mail', 'Can manage and control access to the emailer');
     }
 
     public function registerAction()
@@ -57,6 +65,8 @@ class MailServiceProvider extends ServiceProvider
         $this->app['events']->listen(MessageSending::class, MailSendingListener::class);
         $this->app['events']->listen(MessageSent::class, MailSentListener::class);
         $this->app['events']->listen(MessageFailed::class, MailFailedListener::class);
+        $this->app['events']->listen(fn(\BristolSU\ControlDB\Events\User\UserDeleted $event) => EmailAddressUser::where('user_id', $event->user->id())->delete());
+
 
         $this->app->extend('mail.manager', function(Factory $mailer, $app) {
             return $app->make(MailManager::class, ['mailer' => $mailer]);

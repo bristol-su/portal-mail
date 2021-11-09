@@ -57,11 +57,16 @@ class EmailAddress extends Model
 
     protected static function booted()
     {
+        static::deleted(function (EmailAddress $model) {
+            $model->emailAddressUser()->delete();
+        });
+
         static::deleted(function(EmailAddress $model) {
             if(Ses::isAwsEnabled()) {
                 Ses::deleteEmail($model->email);
             }
         });
+
 
         static::created(function(EmailAddress $model) {
             if(Ses::isAwsEnabled() && !Ses::isEmailVerified($model->email)) {

@@ -4,6 +4,9 @@ namespace BristolSU\Mail\Http\Request;
 
 use BristolSU\Mail\Mail\EmailPayload;
 use BristolSU\Mail\Models\EmailAddress;
+use BristolSU\Mail\Models\EmailAddressUser;
+use BristolSU\Support\Authentication\Contracts\Authentication;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;

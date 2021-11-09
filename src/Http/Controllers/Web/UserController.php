@@ -7,12 +7,16 @@ use BristolSU\Mail\Models\EmailAddress;
 use BristolSU\Mail\Models\EmailAddressUser;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class UserController
 {
+    use AuthorizesRequests;
 
     public function index(User $userRepository)
     {
+        $this->authorize('manage-mail');
+
         $users = collect();
         $userIds = EmailAddressUser::select('user_id')->distinct()->get('user_id')->pluck('user_id');
         foreach($userIds as $userId) {
