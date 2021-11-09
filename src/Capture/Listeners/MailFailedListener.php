@@ -4,22 +4,22 @@ namespace BristolSU\Mail\Capture\Listeners;
 
 use Aws\Ses\Exception\SesException;
 use BristolSU\Mail\Capture\Events\MessageFailed;
-use BristolSU\Mail\Capture\SentMailModel;
+use BristolSU\Mail\Models\SentMail;
 
 class MailFailedListener
 {
 
     public function handle(MessageFailed $event)
     {
-        $sentMailModel = null;
+        $sentMail = null;
         if( isset($event->data['__bristol_su_mail_id']) ) {
-            $sentMailModel = SentMailModel::whereId($event->data['__bristol_su_mail_id'])->firstOrFail();
+            $sentMail = SentMail::whereId($event->data['__bristol_su_mail_id'])->firstOrFail();
         } elseif(isset($event->data['__bristol_su_mail_uuid'])) {
-            $sentMailModel = SentMailModel::where('uuid', $event->data['__bristol_su_mail_uuid'])->firstOrFail();
+            $sentMail = SentMail::where('uuid', $event->data['__bristol_su_mail_uuid'])->firstOrFail();
         }
 
-        if($sentMailModel !== null) {
-            $sentMailModel->update([
+        if($sentMail !== null) {
+            $sentMail->update([
                 'is_sent' => false,
                 'is_error' => true,
                 'error_message' => $this->getMessageFromException($event->exception)

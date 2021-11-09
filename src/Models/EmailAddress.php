@@ -4,7 +4,7 @@ namespace BristolSU\Mail\Models;
 
 use BristolSU\ControlDB\Contracts\Models\User;
 use BristolSU\Database\Mail\Factories\EmailAddressFactory;
-use BristolSU\Mail\Capture\SentMailModel;
+use BristolSU\Mail\Models\SentMail;
 use BristolSU\Mail\Ses\Ses;
 use BristolSU\Support\Authentication\Contracts\Authentication;
 use Illuminate\Database\Eloquent\Builder;
@@ -89,7 +89,7 @@ class EmailAddress extends Model
 
     public function sentMails()
     {
-        return $this->hasMany(SentMailModel::class, 'from_id');
+        return $this->hasMany(SentMail::class, 'from_id');
     }
 
     public function currentUserCanAccess(): bool

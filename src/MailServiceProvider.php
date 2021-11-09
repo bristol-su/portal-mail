@@ -10,6 +10,11 @@ use BristolSU\Mail\Capture\Listeners\MailFailedListener;
 use BristolSU\Mail\Capture\Listeners\MailSendingListener;
 use BristolSU\Mail\Capture\Listeners\MailSentListener;
 use BristolSU\Mail\Capture\MailManager;
+use BristolSU\Mail\Mail\Upload\UploadAttachments;
+use BristolSU\Mail\Mail\Upload\Uploaders\Base64;
+use BristolSU\Mail\Mail\Upload\Uploaders\RemoteFile;
+use BristolSU\Mail\Mail\Upload\Uploaders\UploadedFile;
+use BristolSU\Mail\Models\Attachment;
 use BristolSU\Mail\Models\EmailAddressUser;
 use BristolSU\Mail\Ses\DisabledClient;
 use BristolSU\Mail\Ses\SesClient;
@@ -46,8 +51,16 @@ class MailServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        $this->registerUpload();
         $this->registerAction();
         $this->registerPermissions();
+    }
+
+    public function registerUpload()
+    {
+        UploadAttachments::useUploader(Base64::class);
+        UploadAttachments::useUploader(RemoteFile::class);
+        UploadAttachments::useUploader(UploadedFile::class);
     }
 
     public function registerPermissions()
@@ -87,7 +100,8 @@ class MailServiceProvider extends ServiceProvider
                     '__bristol_su_mail_subject' => $mailable->payload()->getSubject(),
                     '__bristol_su_mail_from_id' => $mailable->payload()->getFrom()->id,
                     '__bristol_su_mail_notes' => $mailable->payload()->getNotes(),
-                    '__bristol_su_mail_sent_via' => $mailable->payload()->getSentVia()
+                    '__bristol_su_mail_sent_via' => $mailable->payload()->getSentVia(),
+                    '__bristol_su_mail_attachments' => collect($mailable->payload()->getAttachments())->pluck('id')->toArray()
                 ] : [],
                 [
                     '__bristol_su_mail_uuid' => Str::uuid(),

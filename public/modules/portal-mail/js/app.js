@@ -363,6 +363,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! moment */ "./node_modules/moment/moment.js");
 /* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var pretty_bytes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! pretty-bytes */ "./node_modules/pretty-bytes/index.js");
+/* harmony import */ var pretty_bytes__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(pretty_bytes__WEBPACK_IMPORTED_MODULE_1__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -403,6 +414,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 
+
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "ViewMessage",
   props: {
@@ -414,6 +426,9 @@ __webpack_require__.r(__webpack_exports__);
   filters: {
     arrayToString: function arrayToString(array) {
       return array.join(', ');
+    },
+    fileSize: function fileSize(bytes) {
+      return pretty_bytes__WEBPACK_IMPORTED_MODULE_1___default()(bytes);
     }
   },
   data: function data() {
@@ -571,8 +586,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       var formData = new FormData();
 
       if (data.attachments.length > 0) {
-        formData.append('type', 'file');
-
         var _iterator = _createForOfIteratorHelper(data.attachments),
             _step;
 
@@ -22292,6 +22305,135 @@ webpackContext.id = "./node_modules/moment/locale sync recursive ^\\.\\/.*$";
 
 /***/ }),
 
+/***/ "./node_modules/pretty-bytes/index.js":
+/*!********************************************!*\
+  !*** ./node_modules/pretty-bytes/index.js ***!
+  \********************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+const BYTE_UNITS = [
+	'B',
+	'kB',
+	'MB',
+	'GB',
+	'TB',
+	'PB',
+	'EB',
+	'ZB',
+	'YB'
+];
+
+const BIBYTE_UNITS = [
+	'B',
+	'kiB',
+	'MiB',
+	'GiB',
+	'TiB',
+	'PiB',
+	'EiB',
+	'ZiB',
+	'YiB'
+];
+
+const BIT_UNITS = [
+	'b',
+	'kbit',
+	'Mbit',
+	'Gbit',
+	'Tbit',
+	'Pbit',
+	'Ebit',
+	'Zbit',
+	'Ybit'
+];
+
+const BIBIT_UNITS = [
+	'b',
+	'kibit',
+	'Mibit',
+	'Gibit',
+	'Tibit',
+	'Pibit',
+	'Eibit',
+	'Zibit',
+	'Yibit'
+];
+
+/*
+Formats the given number using `Number#toLocaleString`.
+- If locale is a string, the value is expected to be a locale-key (for example: `de`).
+- If locale is true, the system default locale is used for translation.
+- If no value for locale is specified, the number is returned unmodified.
+*/
+const toLocaleString = (number, locale, options) => {
+	let result = number;
+	if (typeof locale === 'string' || Array.isArray(locale)) {
+		result = number.toLocaleString(locale, options);
+	} else if (locale === true || options !== undefined) {
+		result = number.toLocaleString(undefined, options);
+	}
+
+	return result;
+};
+
+module.exports = (number, options) => {
+	if (!Number.isFinite(number)) {
+		throw new TypeError(`Expected a finite number, got ${typeof number}: ${number}`);
+	}
+
+	options = Object.assign({bits: false, binary: false}, options);
+
+	const UNITS = options.bits ?
+		(options.binary ? BIBIT_UNITS : BIT_UNITS) :
+		(options.binary ? BIBYTE_UNITS : BYTE_UNITS);
+
+	if (options.signed && number === 0) {
+		return ` 0 ${UNITS[0]}`;
+	}
+
+	const isNegative = number < 0;
+	const prefix = isNegative ? '-' : (options.signed ? '+' : '');
+
+	if (isNegative) {
+		number = -number;
+	}
+
+	let localeOptions;
+
+	if (options.minimumFractionDigits !== undefined) {
+		localeOptions = {minimumFractionDigits: options.minimumFractionDigits};
+	}
+
+	if (options.maximumFractionDigits !== undefined) {
+		localeOptions = Object.assign({maximumFractionDigits: options.maximumFractionDigits}, localeOptions);
+	}
+
+	if (number < 1) {
+		const numberString = toLocaleString(number, options.locale, localeOptions);
+		return prefix + numberString + ' ' + UNITS[0];
+	}
+
+	const exponent = Math.min(Math.floor(options.binary ? Math.log(number) / Math.log(1024) : Math.log10(number) / 3), UNITS.length - 1);
+	// eslint-disable-next-line unicorn/prefer-exponentiation-operator
+	number /= Math.pow(options.binary ? 1024 : 1000, exponent);
+
+	if (!localeOptions) {
+		number = number.toPrecision(3);
+	}
+
+	const numberString = toLocaleString(Number(number), options.locale, localeOptions);
+
+	const unit = UNITS[exponent];
+
+	return prefix + numberString + ' ' + unit;
+};
+
+
+/***/ }),
+
 /***/ "./resources/js/components/address/AddAddress.vue":
 /*!********************************************************!*\
   !*** ./resources/js/components/address/AddAddress.vue ***!
@@ -23266,6 +23408,35 @@ var render = function () {
       staticClass: "border-2",
       domProps: { innerHTML: _vm._s(_vm.message.preview) },
     }),
+    _vm._v(" "),
+    _c("br"),
+    _vm._v(" "),
+    _vm.message.attachments.length > 0
+      ? _c("div", [
+          _vm._v("\n        Attachments:\n        "),
+          _c(
+            "ul",
+            _vm._l(_vm.message.attachments, function (attachment) {
+              return _c("li", [
+                _c(
+                  "a",
+                  {
+                    staticClass: "mt-5 underline",
+                    attrs: {
+                      href: "/mail/attachment/" + attachment.id + "/download",
+                    },
+                  },
+                  [_vm._v(_vm._s(attachment.filename))]
+                ),
+                _vm._v(
+                  " (" + _vm._s(_vm._f("fileSize")(attachment.size)) + ")"
+                ),
+              ])
+            }),
+            0
+          ),
+        ])
+      : _vm._e(),
   ])
 }
 var staticRenderFns = []

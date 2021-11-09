@@ -2,6 +2,7 @@
 
 namespace BristolSU\Mail\Mail;
 
+use BristolSU\Mail\Models\Attachment;
 use BristolSU\Mail\Models\EmailAddress;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
@@ -22,8 +23,6 @@ class EmailPayload implements Jsonable, Arrayable
     private array $bcc = [];
 
     private array $attachments = [];
-
-    private string $type = 'file';
 
     private ?string $notes = null;
 
@@ -75,7 +74,7 @@ class EmailPayload implements Jsonable, Arrayable
     }
 
     /**
-     * @return array
+     * @return array|Attachment[]
      */
     public function getAttachments(): array
     {
@@ -83,30 +82,12 @@ class EmailPayload implements Jsonable, Arrayable
     }
 
     /**
-     * @param array $attachments
+     * @param Attachment[] $attachments
      * @return EmailPayload
      */
     public function setAttachments(array $attachments): EmailPayload
     {
         $this->attachments = $attachments;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    /**
-     * @param string $type
-     * @return EmailPayload
-     */
-    public function setType(string $type): EmailPayload
-    {
-        $this->type = $type;
         return $this;
     }
 
@@ -149,8 +130,7 @@ class EmailPayload implements Jsonable, Arrayable
             'subject' => $this->getSubject(),
             'content' => $this->getContent(),
             'from' => $this->getFrom()->id,
-//            'attachments' => '',
-//            'type' => ''
+            'attachments' => collect($this->attachments)->toArray(),
         ];
     }
 

@@ -2,8 +2,7 @@
 
 namespace BristolSU\Mail\Http\Controllers\Api;
 
-use BristolSU\Mail\Capture\SentMailModel;
-use BristolSU\Mail\Mail\GenericMailable;
+use BristolSU\Mail\Models\SentMail;
 use BristolSU\Mail\Models\EmailAddress;
 use BristolSU\Support\Authentication\Contracts\Authentication;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -19,9 +18,9 @@ class SentEmailController extends Controller
 
         $accessibleEmailIds = EmailAddress::forUser(app(Authentication::class)->getUser())->get()->pluck('id');
 
-        return SentMailModel::whereIn('from_id', $accessibleEmailIds)->all()->map(function(SentMailModel $sentMailModel) {
-            $array = $sentMailModel->toArray();
-            $array['preview'] = GenericMailable::forPayload($sentMailModel->asPayload())->render();
+        return SentMail::whereIn('from_id', $accessibleEmailIds)->get()->map(function(SentMail $sentMail) {
+            $array = $sentMail->toArray();
+            $array['preview'] = $sentMail->asMailable()->render();
             return $array;
         });
     }

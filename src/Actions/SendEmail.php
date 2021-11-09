@@ -4,6 +4,7 @@ namespace BristolSU\Mail\Actions;
 
 use BristolSU\Mail\Mail\EmailPayload;
 use BristolSU\Mail\Mail\SendEmailJob;
+use BristolSU\Mail\Mail\Upload\UploadAttachments;
 use BristolSU\Mail\Models\EmailAddress;
 use BristolSU\Support\Action\ActionResponse;
 use BristolSU\Support\Action\Contracts\Action;
@@ -34,6 +35,7 @@ class SendEmail extends Action
             ->withGroup(Group::make('Content')
                 ->withField(Field::html('Subject')->setLabel('Subject')->setHint('The subject of the email')->setRequired(false))
                 ->withField(Field::html('content')->setLabel('Email Body')->setHint('The contents of the email')->setRequired(true))
+                ->withField(Field::text('attachments')->setLabel('Attachments')->setHint('A comma separated list of URLs')->setRequired(false))
             )
             ->withGroup(Group::make('Meta Data')
                 ->withField(Field::text('notes')->setLabel('Private notes to help you identify the source or context about the email')
@@ -65,6 +67,13 @@ class SendEmail extends Action
         $payload->setSubject($this->option('subject'));
         $payload->setBcc(array_filter(explode(',', $this->option('bcc', ''))));
         $payload->setCc(array_filter(explode(',', $this->option('cc', ''))));
+
+        $files = array_filter(explode(',', $this->option('attachments', '')));
+        if(!empty($files)) {
+            $attachments = new UploadAttachments($files);
+            $attachments->upload();
+            $attachments->getPayload($payload);
+        }
 
         return $payload;
     }

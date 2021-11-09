@@ -2,7 +2,7 @@
 
 namespace BristolSU\Mail\Http\Controllers\Api;
 
-use BristolSU\Mail\Capture\SentMailModel;
+use BristolSU\Mail\Models\SentMail;
 use BristolSU\Mail\Mail\GenericMailable;
 use BristolSU\Mail\Mail\SendEmailJob;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -12,7 +12,7 @@ class ResendSentEmailController extends Controller
 {
     use AuthorizesRequests;
 
-    public function resend(SentMailModel $sentMail)
+    public function resend(SentMail $sentMail)
     {
         $this->authorize('view-management');
 

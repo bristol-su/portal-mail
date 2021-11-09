@@ -2,7 +2,7 @@
 
 namespace BristolSU\Mail\Http\Controllers\Web;
 
-use BristolSU\Mail\Capture\SentMailModel;
+use BristolSU\Mail\Models\SentMail;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class SentEmailController

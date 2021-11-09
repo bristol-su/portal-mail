@@ -2,7 +2,8 @@
 
 namespace BristolSU\Mail\Capture\Listeners;
 
-use BristolSU\Mail\Capture\SentMailModel;
+use BristolSU\Mail\Models\Attachment;
+use BristolSU\Mail\Models\SentMail;
 use Illuminate\Mail\Events\MessageSending;
 
 class MailSendingListener
@@ -15,7 +16,7 @@ class MailSendingListener
          * can use the previous model.
          */
         if (array_key_exists('__bristol_su_mail_id', $event->data)) {
-            $sentMail = SentMailModel::findOrFail(data_get($event->data, '__bristol_su_mail_id'));
+            $sentMail = SentMail::findOrFail(data_get($event->data, '__bristol_su_mail_id'));
             $sentMail->update([
                 'is_sent' => false,
                 'is_error' => false,
@@ -23,7 +24,7 @@ class MailSendingListener
                 'tries' => $sentMail->tries + 1
             ]);
         } else {
-            SentMailModel::create([
+            $sentMail = SentMail::create([
                 'to' => data_get($event->data, '__bristol_su_mail_to', []),
                 'cc' => data_get($event->data, '__bristol_su_mail_cc', []),
                 'bcc' => data_get($event->data, '__bristol_su_mail_bcc', []),
@@ -37,6 +38,9 @@ class MailSendingListener
                 'sent_via' => data_get($event->data, '__bristol_su_mail_sent_via'),
                 'tries' => 1
             ]);
+            foreach(data_get($event->data, '__bristol_su_mail_attachments', []) as $attachmentId) {
+                Attachment::where('id', $attachmentId)->update(['sent_mail_id' => $sentMail->id]);
+            }
         }
     }
 

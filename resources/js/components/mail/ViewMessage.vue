@@ -33,12 +33,22 @@
         <span v-if="message.notes">Notes: {{message.notes}}</span>
         <br v-if="message.notes"/>
         <div v-html="message.preview" class="border-2"></div>
+        <br/>
+
+        <div v-if="message.attachments.length > 0">
+            Attachments:
+            <ul>
+                <li v-for="attachment in message.attachments">
+                    <a class="mt-5 underline" :href="'/mail/attachment/' + attachment.id + '/download'">{{attachment.filename}}</a> ({{attachment.size | fileSize}})</li>
+            </ul>
+        </div>
 
     </div>
 </template>
 
 <script>
 import moment from 'moment';
+import prettyBytes from 'pretty-bytes';
 
 export default {
     name: "ViewMessage",
@@ -49,7 +59,8 @@ export default {
         }
     },
     filters: {
-        arrayToString: (array) => array.join(', ')
+        arrayToString: (array) => array.join(', '),
+        fileSize: (bytes) => prettyBytes(bytes)
     },
     data() {
         return {

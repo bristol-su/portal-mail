@@ -22,7 +22,6 @@ export default {
         send(data) {
             let formData = new FormData();
             if(data.attachments.length > 0) {
-                formData.append('type', 'file');
                 for (let attachment of data.attachments) {
                     formData.append('attachments[]', attachment)
                 }

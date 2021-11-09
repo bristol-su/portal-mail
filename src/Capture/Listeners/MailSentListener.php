@@ -2,7 +2,7 @@
 
 namespace BristolSU\Mail\Capture\Listeners;
 
-use BristolSU\Mail\Capture\SentMailModel;
+use BristolSU\Mail\Models\SentMail;
 use Carbon\Carbon;
 use Illuminate\Mail\Events\MessageSent;
 
@@ -19,9 +19,9 @@ class MailSentListener
         ];
 
         if( isset($event->data['__bristol_su_mail_id']) ) {
-            SentMailModel::whereId($event->data['__bristol_su_mail_id'])->update($data);
+            SentMail::whereId($event->data['__bristol_su_mail_id'])->update($data);
         } elseif(isset($event->data['__bristol_su_mail_uuid'])) {
-            SentMailModel::where('uuid', $event->data['__bristol_su_mail_uuid'])->update($data);
+            SentMail::where('uuid', $event->data['__bristol_su_mail_uuid'])->update($data);
         }
     }
 

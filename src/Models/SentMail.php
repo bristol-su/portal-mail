@@ -1,6 +1,6 @@
 <?php
 
-namespace BristolSU\Mail\Capture;
+namespace BristolSU\Mail\Models;
 
 use BristolSU\Mail\Mail\EmailPayload;
 use BristolSU\Mail\Mail\GenericMailable;
@@ -8,7 +8,7 @@ use BristolSU\Mail\Models\EmailAddress;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Mail;
 
-class SentMailModel extends Model
+class SentMail extends Model
 {
 
     protected $table = 'portal_mail_sent_emails';
@@ -24,7 +24,7 @@ class SentMailModel extends Model
     ];
 
     protected $with = [
-        'from'
+        'from', 'attachments'
     ];
 
     protected $fillable = [
@@ -45,6 +45,18 @@ class SentMailModel extends Model
         'sent_at'
     ];
 
+    protected static function booted()
+    {
+        static::deleted(fn (SentMail $model) => Attachment::where('sent_mail_id', $model->id)->get()
+            ->map(fn(Attachment $attachment) => $attachment->delete())
+        );
+    }
+
+    public function attachments()
+    {
+        return $this->hasMany(Attachment::class, 'sent_mail_id');
+    }
+
     public function from()
     {
         return $this->belongsTo(EmailAddress::class, 'from_id');
@@ -57,7 +69,8 @@ class SentMailModel extends Model
             ->setCc($this->cc)
             ->setBcc($this->bcc)
             ->setNotes($this->notes)
-            ->setSentVia($this->sent_via);
+            ->setSentVia($this->sent_via)
+            ->setAttachments($this->attachments()->get()->all());
     }
 
     public function asMailable(): GenericMailable

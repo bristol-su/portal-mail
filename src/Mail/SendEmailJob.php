@@ -2,10 +2,8 @@
 
 namespace BristolSU\Mail\Mail;
 
-use BristolSU\Mail\Capture\SentMailModel;
-use Illuminate\Bus\Queueable;
+use BristolSU\Mail\Models\SentMail;
 use Illuminate\Contracts\Mail\Mailer;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 
@@ -15,17 +13,17 @@ class SendEmailJob
 
     public EmailPayload $payload;
 
-    private ?SentMailModel $sentMailModel;
+    private ?SentMail $sentMail;
 
     /**
      * Create a new job instance.
      *
      * @param EmailPayload $payload
      */
-    public function __construct(EmailPayload $payload, ?SentMailModel $sentMailModel = null)
+    public function __construct(EmailPayload $payload, ?SentMail $sentMail = null)
     {
         $this->payload = $payload;
-        $this->sentMailModel = $sentMailModel;
+        $this->sentMail = $sentMail;
     }
 
     /**
@@ -37,8 +35,8 @@ class SendEmailJob
     {
         $mailable = GenericMailable::forPayload($this->payload);
 
-        if($this->sentMailModel !== null) {
-            $mailable->with('__bristol_su_mail_id', $this->sentMailModel->id);
+        if($this->sentMail !== null) {
+            $mailable->with('__bristol_su_mail_id', $this->sentMail->id);
         }
 
         $mailer->send($mailable);

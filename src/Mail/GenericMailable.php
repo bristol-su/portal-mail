@@ -43,13 +43,10 @@ class GenericMailable extends Mailable implements IsRecorded
 
         if($this->emailPayload->hasAttachments()) {
             foreach($this->emailPayload->getAttachments() as $attachment) {
-                $this->attach($attachment->getRealPath(),
-                    [
-                        'as' => $attachment->getClientOriginalName(),
-                        'mime' => $attachment->getClientMimeType(),
-                    ]);
+                $this->attachFromStorage($attachment->path, $attachment->filename, [
+                    'mime' => $attachment->mime
+                ]);
             }
-            $this->subject($this->emailPayload->getSubject());
         }
 
         $this->from($this->emailPayload->getFrom()->email);
