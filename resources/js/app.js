@@ -3,6 +3,7 @@ import Toolkit from '@bristol-su/frontend-toolkit';
 import ViewAddresses from './components/address/ViewAddresses';
 import ViewUsers from './components/users/ViewUsers';
 import SendEmail from './components/send/SendEmail';
+import ViewSent from './components/mail/ViewSent';
 
 Vue.use(Toolkit);
 
@@ -11,7 +12,8 @@ let vue = new Vue({
     components: {
         ViewAddresses,
         ViewUsers,
-        SendEmail
+        SendEmail,
+        ViewSent
     }
 });
 

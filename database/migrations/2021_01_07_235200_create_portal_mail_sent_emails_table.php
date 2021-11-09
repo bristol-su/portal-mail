@@ -29,6 +29,7 @@ class CreatePortalMailSentEmailsTable extends Migration
             $table->unsignedBigInteger('user_id')->nullable();
             $table->text('sent_via')->nullable();
             $table->text('notes')->nullable();
+            $table->timestamp('sent_at')->nullable();
             $table->timestamps();
         });
     }

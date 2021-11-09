@@ -20,6 +20,7 @@ class SentMailModel extends Model
         'is_sent' => 'boolean',
         'tries' => 'integer',
         'is_error' => 'boolean',
+        'sent_at' => 'datetime'
     ];
 
     protected $with = [
@@ -39,7 +40,9 @@ class SentMailModel extends Model
         'notes',
         'is_error',
         'error_message',
-        'sent_via'
+        'sent_via',
+        'tries',
+        'sent_at'
     ];
 
     public function from()
@@ -49,24 +52,17 @@ class SentMailModel extends Model
 
     public function asPayload(): EmailPayload
     {
-        return (new EmailPayload($this->content, $this->to, $this->emailAddress))
+        return (new EmailPayload($this->content, $this->to, $this->from))
             ->setSubject($this->subject)
             ->setCc($this->cc)
-            ->setBcc($this->bcc);
+            ->setBcc($this->bcc)
+            ->setNotes($this->notes)
+            ->setSentVia($this->sent_via);
     }
 
     public function asMailable(): GenericMailable
     {
         return GenericMailable::forPayload($this->asPayload());
-    }
-
-    public function resend()
-    {
-        $mailable = $this->asMailable();
-        Mail::send($mailable->with([
-            '__bristol_su_mail_id' => $this->id,
-        ]));
-
     }
 
 }

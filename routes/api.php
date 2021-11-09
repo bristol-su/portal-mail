@@ -7,3 +7,5 @@ Route::apiResource('user', \BristolSU\Mail\Http\Controllers\Api\EmailAddressUser
 Route::post('address/{emailAddress}/verification', [\BristolSU\Mail\Http\Controllers\Api\EmailAddressVerificationController::class, 'sendVerificationLink']);
 Route::post('send', [\BristolSU\Mail\Http\Controllers\Api\EmailController::class, 'send']);
 Route::get('domains', [\BristolSU\Mail\Http\Controllers\Api\DomainController::class, 'index']);
+Route::apiResource('sent', \BristolSU\Mail\Http\Controllers\Api\SentEmailController::class)->only('index');
+Route::post('sent/{sentMail}/resend/', [\BristolSU\Mail\Http\Controllers\Api\ResendSentEmailController::class, 'resend']);

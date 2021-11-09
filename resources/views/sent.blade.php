@@ -7,7 +7,10 @@
     <p-page-content title="Sent Emails"
                     subtitle="View sent emails">
 
-        @dd($emails->toArray())
+        <view-sent>
+
+        </view-sent>
+
     </p-page-content>
 
 @endsection

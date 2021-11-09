@@ -3,6 +3,7 @@
 namespace BristolSU\Mail\Capture\Listeners;
 
 use BristolSU\Mail\Capture\SentMailModel;
+use Carbon\Carbon;
 use Illuminate\Mail\Events\MessageSent;
 
 class MailSentListener
@@ -14,6 +15,7 @@ class MailSentListener
             'is_sent' => true,
             'is_error' => false,
             'error_message' => null,
+            'sent_at' => Carbon::now()
         ];
 
         if( isset($event->data['__bristol_su_mail_id']) ) {

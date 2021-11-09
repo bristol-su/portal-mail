@@ -9,9 +9,7 @@ class SentEmailController
 
     public function index()
     {
-        return view('portal-mail::sent', [
-            'emails' => SentMailModel::all()
-        ]);
+        return view('portal-mail::sent');
     }
 
 }

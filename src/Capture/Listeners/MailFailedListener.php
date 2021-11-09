@@ -11,16 +11,19 @@ class MailFailedListener
 
     public function handle(MessageFailed $event)
     {
-        $data = [
-            'is_sent' => false,
-            'is_error' => true,
-            'error_message' => $this->getMessageFromException($event->exception)
-        ];
-
+        $sentMailModel = null;
         if( isset($event->data['__bristol_su_mail_id']) ) {
-            SentMailModel::whereId($event->data['__bristol_su_mail_id'])->update($data);
+            $sentMailModel = SentMailModel::whereId($event->data['__bristol_su_mail_id'])->firstOrFail();
         } elseif(isset($event->data['__bristol_su_mail_uuid'])) {
-            SentMailModel::where('uuid', $event->data['__bristol_su_mail_uuid'])->update($data);
+            $sentMailModel = SentMailModel::where('uuid', $event->data['__bristol_su_mail_uuid'])->firstOrFail();
+        }
+
+        if($sentMailModel !== null) {
+            $sentMailModel->update([
+                'is_sent' => false,
+                'is_error' => true,
+                'error_message' => $this->getMessageFromException($event->exception)
+            ]);
         }
     }
 

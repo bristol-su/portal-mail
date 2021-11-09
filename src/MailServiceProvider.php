@@ -3,6 +3,7 @@
 namespace BristolSU\Mail;
 
 use Aws\Sdk;
+use BristolSU\Mail\Actions\SendEmail;
 use BristolSU\Mail\Capture\Contracts\IsRecorded;
 use BristolSU\Mail\Capture\Events\MessageFailed;
 use BristolSU\Mail\Capture\Listeners\MailFailedListener;
@@ -12,6 +13,7 @@ use BristolSU\Mail\Capture\MailManager;
 use BristolSU\Mail\Ses\DisabledClient;
 use BristolSU\Mail\Ses\SesClient;
 use BristolSU\Mail\Ses\SesSdkClient;
+use BristolSU\Support\Action\Facade\ActionManager;
 use BristolSU\Support\Authentication\Contracts\Authentication;
 use Illuminate\Contracts\Mail\Mailer;
 use Illuminate\Contracts\Mail\Factory;
@@ -38,6 +40,16 @@ class MailServiceProvider extends ServiceProvider
         $this->registerAws();
         $this->registerEmailCapture();
         $this->registerCommands();
+    }
+
+    public function boot()
+    {
+        $this->registerAction();
+    }
+
+    public function registerAction()
+    {
+        ActionManager::registerAction(SendEmail::class, 'Send an Email', 'Send an email directly to the portal to email addresses');
     }
 
     public function registerEmailCapture()

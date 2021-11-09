@@ -34,7 +34,8 @@ class MailSendingListener
                 'uuid' => data_get($event->data, '__bristol_su_mail_uuid'),
                 'user_id' => data_get($event->data, '__bristol_su_mail_user_id'),
                 'notes' => data_get($event->data, '__bristol_su_mail_notes'),
-                'sent_via' => data_get($event->data, '__bristol_su_mail_sent_via')
+                'sent_via' => data_get($event->data, '__bristol_su_mail_sent_via'),
+                'tries' => 1
             ]);
         }
     }
