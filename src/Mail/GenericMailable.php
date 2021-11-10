@@ -4,6 +4,7 @@ namespace BristolSU\Mail\Mail;
 
 use BristolSU\Mail\Capture\Contracts\IsRecorded;
 use BristolSU\Mail\Mail\EmailPayload;
+use BristolSU\Mail\Models\EmailAddress;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -49,11 +50,21 @@ class GenericMailable extends Mailable implements IsRecorded
             }
         }
 
-        $this->from($this->emailPayload->getFrom()->email);
+        if($this->emailPayload->hasPriority()) {
+            $this->priority($this->emailPayload->getPriority());
+        }
+
+        if($this->emailPayload->hasReplyTo()) {
+            $email = EmailAddress::where('email', $this->emailPayload->getReplyTo())->first();
+            $this->replyTo($this->emailPayload->getReplyTo(), $email?->name);
+        }
+
+        $this->from($this->emailPayload->getFrom()->email, $this->emailPayload->getFrom()->name);
 
         $this->to($this->emailPayload->getTo());
 
-        return $this->view('portal-mail::emails.email');
+        return $this->view('portal-mail::emails.email')
+                ->text('portal-mail::emails.email_plain');
 
     }
 

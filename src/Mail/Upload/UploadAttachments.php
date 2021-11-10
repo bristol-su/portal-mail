@@ -4,11 +4,15 @@ namespace BristolSU\Mail\Mail\Upload;
 
 use BristolSU\Mail\Mail\EmailPayload;
 use BristolSU\Mail\Models\Attachment;
+use Illuminate\Http\File;
+use Illuminate\Http\FileHelpers;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class UploadAttachments
 {
+    use FileHelpers;
 
     /**
      * @var array|UploadedFile[]
@@ -68,6 +72,23 @@ class UploadAttachments
                 'mime' => $uploadedFile->getClientMimeType(),
                 'path' => $path,
                 'size' => $uploadedFile->getSize()
+            ]);
+        }
+    }
+
+    /**
+     * Add the following from existing attachments
+     *
+     * @param array|Attachment[] $existing
+     */
+    public function appendExisting(array $existing)
+    {
+        foreach($existing as $attachment) {
+            $this->uploadedFiles[] = Attachment::create([
+                'filename' => $attachment->filename,
+                'mime' => $attachment->mime,
+                'path' => $attachment->path,
+                'size' => $attachment->size
             ]);
         }
     }

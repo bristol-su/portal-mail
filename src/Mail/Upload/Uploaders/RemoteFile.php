@@ -17,6 +17,6 @@ class RemoteFile extends Uploader
     {
         $path = tempnam(sys_get_temp_dir(), 'portal-mail');
         file_put_contents($path, file_get_contents($file));
-        return new UploadedFile($path, basename($file), mime_content_type($path));
+        return new UploadedFile($path, explode('?', basename($file))[0], mime_content_type($path));
     }
 }

@@ -68,7 +68,9 @@ export default {
     data() {
         return {
             emailTableFields: [
+                {key: 'id', label: 'ID'},
                 {key: 'email', label: 'Email Address'},
+                {key: 'name', label: 'Name'},
                 {key: 'status', label: 'Status'},
             ],
             domainFields: [

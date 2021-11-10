@@ -16,6 +16,7 @@ class CreatePortalMailEmailAddressesTable extends Migration
         Schema::create('portal_mail_email_addresses', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('email');
+            $table->string('name')->nullable();
             $table->timestamps();
         });
     }

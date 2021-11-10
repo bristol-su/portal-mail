@@ -33,13 +33,9 @@ class SendEmailJob
      */
     public function handle(Mailer $mailer)
     {
-        $mailable = GenericMailable::forPayload($this->payload);
-
-        if($this->sentMail !== null) {
-            $mailable->with('__bristol_su_mail_id', $this->sentMail->id);
-        }
-
-        $mailer->send($mailable);
+        $mailer->send(
+            GenericMailable::forPayload($this->payload)
+        );
     }
 
 }

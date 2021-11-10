@@ -114,7 +114,8 @@ __webpack_require__.r(__webpack_exports__);
       // TODO Change to info not delete
       this.$ui.confirm["delete"]('Add email address?', 'Are you sure you want to add this email address? This will allow emails to be sent from ' + data.email).then(function () {
         _this.$httpBasic.post('/mail/address', {
-          email: data.email
+          email: data.email,
+          name: data.name
         }, {
           name: 'email-address-add'
         }).then(function (response) {
@@ -130,7 +131,7 @@ __webpack_require__.r(__webpack_exports__);
       return this.emails;
     },
     form: function form() {
-      return this.$tools.generator.form.newForm().withField(this.$tools.generator.field.text('email').label('Email Address').hint('The new email address').tooltip('The email you\'d like to be able to send from').required(true));
+      return this.$tools.generator.form.newForm().withField(this.$tools.generator.field.text('email').label('Email Address').hint('The new email address').tooltip('The email you\'d like to be able to send from').required(true)).withField(this.$tools.generator.field.text('name').label('Name').hint('The name to show to the users (e.g. Bristol SU)').tooltip('This will appear next to the email address in any emails sent from this email').required(true));
     }
   }
 });
@@ -240,8 +241,14 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
   data: function data() {
     return {
       emailTableFields: [{
+        key: 'id',
+        label: 'ID'
+      }, {
         key: 'email',
         label: 'Email Address'
+      }, {
+        key: 'name',
+        label: 'Name'
       }, {
         key: 'status',
         label: 'Status'
@@ -365,6 +372,29 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var moment__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(moment__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var pretty_bytes__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! pretty-bytes */ "./node_modules/pretty-bytes/index.js");
 /* harmony import */ var pretty_bytes__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(pretty_bytes__WEBPACK_IMPORTED_MODULE_1__);
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr == null ? null : typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]; if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -425,14 +455,22 @@ __webpack_require__.r(__webpack_exports__);
   },
   filters: {
     arrayToString: function arrayToString(array) {
-      return array.join(', ');
+      return Array.isArray(array) ? array.join(', ') : '';
     },
     fileSize: function fileSize(bytes) {
       return pretty_bytes__WEBPACK_IMPORTED_MODULE_1___default()(bytes);
     }
   },
   data: function data() {
-    return {};
+    return {
+      retryColumns: [{
+        key: 'id',
+        label: 'ID'
+      }, {
+        key: 'status',
+        label: 'Status'
+      }]
+    };
   },
   methods: {
     moment: function moment(val) {
@@ -452,7 +490,35 @@ __webpack_require__.r(__webpack_exports__);
       });
     }
   },
-  computed: {}
+  computed: {
+    resendUrl: function resendUrl() {
+      var parsedUrl = new URL(this.$tools.routes.basic.baseWebUrl() + '/mail/send');
+      Object.entries({
+        resend_id: this.message.id
+      }).forEach(function (_ref) {
+        var _ref2 = _slicedToArray(_ref, 2),
+            key = _ref2[0],
+            value = _ref2[1];
+
+        parsedUrl.searchParams.set(key, value);
+      });
+      return parsedUrl.toString();
+    },
+    retries: function retries() {
+      return this.message.retries;
+    },
+    validationErrorMessage: function validationErrorMessage() {
+      return JSON.parse(this.message.error_message);
+    },
+    failedDueToValidation: function failedDueToValidation() {
+      try {
+        console.log(this.validationErrorMessage.validation);
+        return this.validationErrorMessage.validation;
+      } catch (e) {}
+
+      return false;
+    }
+  }
 });
 
 /***/ }),
@@ -469,6 +535,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony import */ var _ViewMessage__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ViewMessage */ "./resources/js/components/mail/ViewMessage.vue");
+//
+//
+//
+//
 //
 //
 //
@@ -505,13 +575,18 @@ __webpack_require__.r(__webpack_exports__);
         label: 'Status'
       }],
       viewingMessage: null,
-      sent: []
+      sent: [],
+      viewingRetry: null
     };
   },
   created: function created() {
     return this.loadMessages();
   },
   methods: {
+    viewRetry: function viewRetry(retry) {
+      this.viewingRetry = retry;
+      this.$ui.modal.show('view-retry');
+    },
     loadMessages: function loadMessages() {
       var _this = this;
 
@@ -531,8 +606,9 @@ __webpack_require__.r(__webpack_exports__);
   computed: {
     sentMessages: function sentMessages() {
       return this.sent.map(function (sent) {
-        sent.string_to = sent.to.join(', ');
-        sent.status = sent.is_error ? 'Failed' : sent.is_sent ? 'Sent' : 'Pending';
+        var _sent$to;
+
+        sent.string_to = ((_sent$to = sent.to) !== null && _sent$to !== void 0 ? _sent$to : []).join(', ');
         return sent;
       });
     }
@@ -579,9 +655,53 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       }
     }
   },
+  data: function data() {
+    return {
+      initialData: {},
+      showForm: false
+    };
+  },
+  created: function created() {
+    var _this = this;
+
+    if (this.query.resend_id) {
+      this.$httpBasic.get('/mail/sent/' + this.query.resend_id, {
+        name: 'resent-message'
+      }).then(function (response) {
+        var _response$data$cc, _response$data$bcc, _response$data$subjec, _response$data$notes, _response$data$conten, _response$data$priori, _response$data$reply_;
+
+        return _this.initialData = {
+          from: response.data.from.id,
+          to: response.data.to,
+          cc: (_response$data$cc = response.data.cc) !== null && _response$data$cc !== void 0 ? _response$data$cc : '',
+          bcc: (_response$data$bcc = response.data.bcc) !== null && _response$data$bcc !== void 0 ? _response$data$bcc : '',
+          subject: (_response$data$subjec = response.data.subject) !== null && _response$data$subjec !== void 0 ? _response$data$subjec : null,
+          notes: (_response$data$notes = response.data.notes) !== null && _response$data$notes !== void 0 ? _response$data$notes : null,
+          content: (_response$data$conten = response.data.content) !== null && _response$data$conten !== void 0 ? _response$data$conten : null,
+          priority: (_response$data$priori = response.data.priority) !== null && _response$data$priori !== void 0 ? _response$data$priori : null,
+          reply_to: (_response$data$reply_ = response.data.reply_to) !== null && _response$data$reply_ !== void 0 ? _response$data$reply_ : null,
+          existing_attachments_for_select: response.data.attachments.map(function (a) {
+            return {
+              id: a.id,
+              text: a.filename
+            };
+          }),
+          existing_attachments: response.data.attachments.map(function (a) {
+            return a.id;
+          })
+        };
+      })["catch"](function (error) {
+        return _this.$notify.alert('Could not load previous mail: ' + error.message);
+      }).then(function () {
+        return _this.showForm = true;
+      });
+    } else {
+      this.showForm = true;
+    }
+  },
   methods: {
     send: function send(data) {
-      var _this = this;
+      var _this2 = this;
 
       var formData = new FormData();
 
@@ -649,30 +769,64 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       formData.append('notes', data.notes);
       formData.append('content', data.content);
       formData.append('via', 'inbox');
-      console.log(formData.forEach(function (value, key) {
-        return console.log(value, key);
-      }));
+      formData.append('reply_to', data.reply_to);
+      formData.append('priority', data.priority);
+
+      if (data.existing_attachments && data.existing_attachments.length > 0) {
+        var _iterator5 = _createForOfIteratorHelper(data.existing_attachments),
+            _step5;
+
+        try {
+          for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+            var existing_attachments = _step5.value;
+            formData.append('existing_attachments[]', existing_attachments);
+          }
+        } catch (err) {
+          _iterator5.e(err);
+        } finally {
+          _iterator5.f();
+        }
+      }
+
+      if (this.query.resend_id) {
+        formData.append('resend_id', this.query.resend_id);
+      }
+
       this.$httpBasic.post('/mail/send', formData, {
         name: 'sending-email',
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       }).then(function (response) {
-        _this.$notify.success('Email sent');
+        _this2.$notify.success('Email sent');
       })["catch"](function (error) {
-        return _this.$notify.error('Email was not sent: ' + error.message);
+        return _this2.$notify.alert('Email was not sent: ' + error.message);
       });
     },
     preview: function preview(data) {}
   },
   computed: {
+    query: function query() {
+      return Object.fromEntries(new URLSearchParams(window.location.search).entries());
+    },
     form: function form() {
-      return this.$tools.generator.form.newForm().withField(this.$tools.generator.field.select('from').setOptions(this.from.map(function (e) {
+      var _this$query$resend_id;
+
+      var form = this.$tools.generator.form.newForm().withField(this.$tools.generator.field.select('from').setOptions(this.from.map(function (e) {
         return {
           id: e.id,
           value: e.email
         };
-      })).label('From').hint('Who to send the email from.').tooltip('This will appear as the address the email is sent from').required(true)).withField(this.$tools.generator.field.tags('to').label('To *').hint('Who to send the email to.').tooltip('You may enter multiple recipients by pressing enter.').required(false)).withField(this.$tools.generator.field.tags('cc').label('CC').hint('Who to cc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.tags('bcc').label('Bcc').hint('Who to bcc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.text('subject').label('Subject').hint('The subject of the message.').tooltip('This will appear as the subject on the email.').required(false)).withField(this.$tools.generator.field.text('notes').label('Notes').hint('Notes to help you identify the email later.').tooltip('These notes aren\'t shown to the user, and will be kept private.').required(false)).withField(new _bristol_su_portal_ui_kit_src_generator_schema_Field__WEBPACK_IMPORTED_MODULE_0__["default"]('html', 'content').label('Content').hint('The body of the email').required(false)).withField(this.$tools.generator.field.file('attachments').label('Attachments').multiple(true).hint('Attachments for the email.').value([]).tooltip('You may select multiple files.').required(false));
+      })).label('From').hint('Who to send the email from.').tooltip('This will appear as the address the email is sent from').required(true)).withField(this.$tools.generator.field.tags('to').label('To *').hint('Who to send the email to.').tooltip('You may enter multiple recipients by pressing enter.').required(false)).withField(this.$tools.generator.field.tags('cc').label('CC').hint('Who to cc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.tags('bcc').label('Bcc').hint('Who to bcc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.text('subject').label('Subject').hint('The subject of the message.').tooltip('This will appear as the subject on the email.').required(false)).withField(this.$tools.generator.field.text('notes').label('Notes').hint('Notes to help you identify the email later.').tooltip('These notes aren\'t shown to the user, and will be kept private.').required(false)).withField(new _bristol_su_portal_ui_kit_src_generator_schema_Field__WEBPACK_IMPORTED_MODULE_0__["default"]('html', 'content').label('Content').hint('The body of the email').required(false)).withField(this.$tools.generator.field.select('priority').label('Priority').hint('1 is high priority, 5 is low priority').required(false).withOption(1, 'Highest').withOption(2, 'High').withOption(3, 'Medium').withOption(4, 'Low').withOption(5, 'Lowest')).withField(this.$tools.generator.field.text('reply_to').label('Reply To').hint('The email that replies should be directed to.').required(false)).withField(this.$tools.generator.field.file('attachments').label('Attachments').multiple(true).hint('Attachments for the email.').value([]).tooltip('You may select multiple files.').required(false));
+
+      if (Object.entries((_this$query$resend_id = this.query.resend_id) !== null && _this$query$resend_id !== void 0 ? _this$query$resend_id : {}).length > 0 && this.initialData.existing_attachments.length > 0) {
+        console.log(this.initialData.existing_attachments.map(function (e) {
+          return e.id;
+        }));
+        form.withField(this.$tools.generator.field.checkList('existing_attachments').label('Uploaded Attachments').hint('Attachments that have already been uploaded in a previous attempt').required(false).value(this.initialData.existing_attachments).setOptions(this.initialData.existing_attachments_for_select));
+      }
+
+      return form;
     }
   }
 });
@@ -23269,7 +23423,7 @@ var render = function () {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _vm.message.is_error
+    _vm.message.status === "Failed"
       ? _c(
           "div",
           {
@@ -23280,62 +23434,28 @@ var render = function () {
             _c("p", { staticClass: "font-bold" }, [
               _vm._v(
                 "The email failed to send after " +
-                  _vm._s(_vm.message.tries) +
+                  _vm._s(_vm.message.retries.length + 1) +
                   " attempt" +
-                  _vm._s(_vm.message.tries === 1 ? "" : "s") +
+                  _vm._s(_vm.message.retries.length === 0 ? "" : "s") +
                   "."
               ),
             ]),
             _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(_vm.message.error_message))]),
-            _vm._v(" "),
-            _c(
-              "p-button",
-              {
-                attrs: {
-                  variant: "secondary",
-                  busy: _vm.$isLoading("resend-message"),
-                  "busy-text": "Sending",
-                },
-                on: { click: _vm.resend },
-              },
-              [_vm._v("\n             Resend\n         ")]
-            ),
-          ],
-          1
+            _vm.failedDueToValidation
+              ? _c("p", [
+                  _vm._v(
+                    "\n            " +
+                      _vm._s(_vm.validationErrorMessage.errors) +
+                      "\n\n            " +
+                      _vm._s(_vm.validationErrorMessage.data) +
+                      "\n        "
+                  ),
+                ])
+              : _c("p", [_vm._v(_vm._s(_vm.message.error_message))]),
+          ]
         )
-      : _vm.message.is_sent
+      : _vm.message.status === "Pending"
       ? _c(
-          "div",
-          {
-            staticClass:
-              "bg-success border-l-4 rounded-t border-success-dark text-black p-4 text-left",
-          },
-          [
-            _c("p", { staticClass: "font-bold" }, [
-              _vm._v(
-                "The email was sent at " +
-                  _vm._s(_vm.moment(_vm.message.sent_at).format("lll")) +
-                  "."
-              ),
-            ]),
-            _vm._v(" "),
-            _c(
-              "p-button",
-              {
-                attrs: {
-                  variant: "secondary",
-                  busy: _vm.$isLoading("resend-message"),
-                  "busy-text": "Sending",
-                },
-                on: { click: _vm.resend },
-              },
-              [_vm._v("\n            Resend\n        ")]
-            ),
-          ],
-          1
-        )
-      : _c(
           "div",
           {
             staticClass:
@@ -23346,27 +23466,22 @@ var render = function () {
               _vm._v(
                 "The email was set to send " +
                   _vm._s(_vm.moment(_vm.message.updated_at).fromNow()) +
-                  " ago."
+                  "."
               ),
             ]),
-            _vm._v(" "),
-            _c(
-              "p-button",
-              {
-                attrs: {
-                  variant: "secondary",
-                  busy: _vm.$isLoading("resend-message"),
-                  "busy-text": "Sending",
-                },
-                on: { click: _vm.resend },
-              },
-              [_vm._v("\n            Resend\n        ")]
-            ),
-          ],
-          1
-        ),
+          ]
+        )
+      : _vm._e(),
     _vm._v(" "),
-    _c("span", [_vm._v("From: " + _vm._s(_vm.message.from.email))]),
+    _c("span", [
+      _vm._v(
+        "From: " +
+          _vm._s(_vm.message.from.name) +
+          " <" +
+          _vm._s(_vm.message.from.email) +
+          ">"
+      ),
+    ]),
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
@@ -23376,21 +23491,21 @@ var render = function () {
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
-    _vm.message.cc.length > 0
+    _vm.message.cc && _vm.message.cc.length > 0
       ? _c("span", [
           _vm._v("Cc: " + _vm._s(_vm._f("arrayToString")(_vm.message.cc))),
         ])
       : _vm._e(),
     _vm._v(" "),
-    _vm.message.cc.length > 0 ? _c("br") : _vm._e(),
+    _vm.message.cc && _vm.message.cc.length > 0 ? _c("br") : _vm._e(),
     _vm._v(" "),
-    _vm.message.bcc.length > 0
+    _vm.message.bcc && _vm.message.bcc.length > 0
       ? _c("span", [
           _vm._v("Bcc: " + _vm._s(_vm._f("arrayToString")(_vm.message.bcc))),
         ])
       : _vm._e(),
     _vm._v(" "),
-    _vm.message.cc.length > 0 ? _c("br") : _vm._e(),
+    _vm.message.bcc && _vm.message.bcc.length > 0 ? _c("br") : _vm._e(),
     _vm._v(" "),
     _vm.message.sent_via
       ? _c("span", [_vm._v("Sent Via: " + _vm._s(_vm.message.sent_via))])
@@ -23398,11 +23513,33 @@ var render = function () {
     _vm._v(" "),
     _vm.message.sent_via ? _c("br") : _vm._e(),
     _vm._v(" "),
+    _vm.message.reply_to
+      ? _c("span", [_vm._v("Reply To: " + _vm._s(_vm.message.reply_to))])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.message.reply_to ? _c("br") : _vm._e(),
+    _vm._v(" "),
+    _vm.message.priority
+      ? _c("span", [_vm._v("Priority: " + _vm._s(_vm.message.priority))])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.message.priority ? _c("br") : _vm._e(),
+    _vm._v(" "),
     _vm.message.notes
       ? _c("span", [_vm._v("Notes: " + _vm._s(_vm.message.notes))])
       : _vm._e(),
     _vm._v(" "),
     _vm.message.notes ? _c("br") : _vm._e(),
+    _vm._v(" "),
+    _vm.message.sent_at
+      ? _c("span", [
+          _vm._v(
+            "Sent At: " + _vm._s(_vm.moment(_vm.message.sent_at).format("lll"))
+          ),
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.message.sent_at ? _c("br") : _vm._e(),
     _vm._v(" "),
     _c("div", {
       staticClass: "border-2",
@@ -23411,7 +23548,7 @@ var render = function () {
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
-    _vm.message.attachments.length > 0
+    _vm.message.attachments && _vm.message.attachments.length > 0
       ? _c("div", [
           _vm._v("\n        Attachments:\n        "),
           _c(
@@ -23436,6 +23573,33 @@ var render = function () {
             0
           ),
         ])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.message.resend_id === null
+      ? _c(
+          "div",
+          [
+            _c(
+              "p-button",
+              { attrs: { variant: "secondary", href: _vm.resendUrl } },
+              [_vm._v("\n            Resend\n        ")]
+            ),
+            _vm._v(" "),
+            _c("p-table", {
+              attrs: {
+                columns: _vm.retryColumns,
+                items: _vm.retries,
+                viewable: true,
+              },
+              on: {
+                view: function ($event) {
+                  return _vm.$emit("viewRetry", $event)
+                },
+              },
+            }),
+          ],
+          1
+        )
       : _vm._e(),
   ])
 }
@@ -23492,7 +23656,28 @@ var render = function () {
         },
         [
           _vm.viewingMessage !== null
-            ? _c("view-message", { attrs: { message: _vm.viewingMessage } })
+            ? _c("view-message", {
+                attrs: { message: _vm.viewingMessage },
+                on: { viewRetry: _vm.viewRetry },
+              })
+            : _vm._e(),
+        ],
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "p-modal",
+        {
+          attrs: { id: "view-retry", title: "View Retry" },
+          on: {
+            hide: function ($event) {
+              _vm.viewingRetry = null
+            },
+          },
+        },
+        [
+          _vm.viewingRetry
+            ? _c("view-message", { attrs: { message: _vm.viewingRetry } })
             : _vm._e(),
         ],
         1
@@ -23527,15 +23712,18 @@ var render = function () {
   return _c(
     "p-form-padding",
     [
-      _c("p-api-form", {
-        attrs: {
-          schema: _vm.form,
-          "button-text": "Send",
-          busy: _vm.$isLoading("sending-email"),
-          "busy-text": "Sending",
-        },
-        on: { submit: _vm.send },
-      }),
+      _vm.showForm
+        ? _c("p-api-form", {
+            attrs: {
+              "initial-data": _vm.initialData,
+              schema: _vm.form,
+              "button-text": "Send",
+              busy: _vm.$isLoading("sending-email"),
+              "busy-text": "Sending",
+            },
+            on: { submit: _vm.send },
+          })
+        : _vm._e(),
     ],
     1
   )

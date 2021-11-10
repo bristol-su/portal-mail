@@ -20,7 +20,7 @@ class EmailAddress extends Model
     protected $appends = ['status', 'domain'];
 
     protected $fillable = [
-        'email'
+        'email', 'name'
     ];
 
     public function scopeWhereDomain(Builder $query, string $domain)

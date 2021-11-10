@@ -28,6 +28,12 @@ class EmailPayload implements Jsonable, Arrayable
 
     private string $sentVia = 'system';
 
+    private ?int $priority = null;
+
+    private ?string $replyTo = null;
+
+    private ?int $resendId = null;
+
     public function __construct(
         string $content, array $to, EmailAddress $from
     )
@@ -35,6 +41,75 @@ class EmailPayload implements Jsonable, Arrayable
         $this->content = $content;
         $this->to = $to;
         $this->from = $from;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getResendId(): ?int
+    {
+        return $this->resendId;
+    }
+
+    /**
+     * @param int|null $resendId
+     * @return EmailPayload
+     */
+    public function setResendId(?int $resendId): EmailPayload
+    {
+        $this->resendId = $resendId;
+        return $this;
+    }
+
+    public function isResend(): bool
+    {
+        return $this->resendId !== null;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getPriority(): ?int
+    {
+        return $this->priority;
+    }
+
+    /**
+     * @param int|null $priority
+     * @return EmailPayload
+     */
+    public function setPriority(?int $priority): EmailPayload
+    {
+        $this->priority = $priority;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getReplyTo(): ?string
+    {
+        return $this->replyTo;
+    }
+
+    /**
+     * @param string|null $replyTo
+     * @return EmailPayload
+     */
+    public function setReplyTo(?string $replyTo): EmailPayload
+    {
+        $this->replyTo = $replyTo;
+        return $this;
+    }
+
+    public function hasReplyTo(): bool
+    {
+        return $this->replyTo !== null;
+    }
+
+    public function hasPriority(): bool
+    {
+        return $this->priority !== null;
     }
 
     /**

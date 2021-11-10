@@ -2,6 +2,7 @@
 
 namespace BristolSU\Mail\Capture\Listeners;
 
+use BristolSU\Mail\Mail\EmailPayload;
 use BristolSU\Mail\Models\Attachment;
 use BristolSU\Mail\Models\SentMail;
 use Illuminate\Mail\Events\MessageSending;
@@ -11,34 +12,30 @@ class MailSendingListener
 
     public function handle(MessageSending $event)
     {
-        /*
-         * If __bristol_su_sent_mail_id is set, the mail has already been sent, so we
-         * can use the previous model.
-         */
-        if (array_key_exists('__bristol_su_mail_id', $event->data)) {
-            $sentMail = SentMail::findOrFail(data_get($event->data, '__bristol_su_mail_id'));
-            $sentMail->update([
-                'is_sent' => false,
-                'is_error' => false,
-                'error_message' => null,
-                'tries' => $sentMail->tries + 1
-            ]);
-        } else {
+        if (array_key_exists('__bristol_su_mail_payload', $event->data)) {
+
+            /** @var EmailPayload $payload */
+            $payload = $event->data['__bristol_su_mail_payload'];
+
             $sentMail = SentMail::create([
-                'to' => data_get($event->data, '__bristol_su_mail_to', []),
-                'cc' => data_get($event->data, '__bristol_su_mail_cc', []),
-                'bcc' => data_get($event->data, '__bristol_su_mail_bcc', []),
-                'content' => data_get($event->data, '__bristol_su_mail_content'),
-                'subject' => data_get($event->data, '__bristol_su_mail_subject'),
-                'from_id' => data_get($event->data, '__bristol_su_mail_from_id'),
+                'to' => $payload->getTo(),
+                'cc' => $payload->getCc(),
+                'bcc' => $payload->getBcc(),
+                'content' => $payload->getContent(),
+                'subject' => $payload->getSubject(),
+                'from_id' => $payload->getFrom()->id,
                 'is_sent' => false,
                 'uuid' => data_get($event->data, '__bristol_su_mail_uuid'),
                 'user_id' => data_get($event->data, '__bristol_su_mail_user_id'),
-                'notes' => data_get($event->data, '__bristol_su_mail_notes'),
-                'sent_via' => data_get($event->data, '__bristol_su_mail_sent_via'),
-                'tries' => 1
+                'notes' => $payload->getNotes(),
+                'sent_via' => $payload->getSentVia(),
+                'priority' => $payload->getPriority(),
+                'reply_to' => $payload->getReplyTo(),
+                'resend_id' => $payload->isResend() ? $payload->getResendId() : null
             ]);
-            foreach(data_get($event->data, '__bristol_su_mail_attachments', []) as $attachmentId) {
+
+
+            foreach(collect($payload->getAttachments())->pluck('id')->toArray() as $attachmentId) {
                 Attachment::where('id', $attachmentId)->update(['sent_mail_id' => $sentMail->id]);
             }
         }

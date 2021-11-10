@@ -18,7 +18,8 @@ export default {
             this.$ui.confirm.delete('Add email address?', 'Are you sure you want to add this email address? This will allow emails to be sent from ' + data.email)
                 .then(() => {
                     this.$httpBasic.post('/mail/address', {
-                        email: data.email
+                        email: data.email,
+                        name: data.name
                     }, {name: 'email-address-add'})
                         .then(response => {
                             this.$ui.notify.success('Email added');
@@ -37,6 +38,11 @@ export default {
                     .label('Email Address')
                     .hint('The new email address')
                     .tooltip('The email you\'d like to be able to send from')
+                    .required(true)
+                ).withField(this.$tools.generator.field.text('name')
+                    .label('Name')
+                    .hint('The name to show to the users (e.g. Bristol SU)')
+                    .tooltip('This will appear next to the email address in any emails sent from this email')
                     .required(true)
                 );
         }

@@ -5,9 +5,13 @@
         </p-table>
 
         <p-modal id="view-message" @hide="viewingMessage = null" :title="'Viewing Message #' + (viewingMessage ? viewingMessage.id : 'N/A')">
-            <view-message :message="viewingMessage" v-if="viewingMessage !== null">
+            <view-message :message="viewingMessage" v-if="viewingMessage !== null" @viewRetry="viewRetry">
 
             </view-message>
+        </p-modal>
+
+        <p-modal id="view-retry" title="View Retry" @hide="viewingRetry = null">
+            <view-message :message="viewingRetry" v-if="viewingRetry"></view-message>
         </p-modal>
     </div>
 </template>
@@ -29,13 +33,18 @@ export default {
                 {key: 'status', label: 'Status'},
             ],
             viewingMessage: null,
-            sent: []
+            sent: [],
+            viewingRetry: null
         }
     },
     created() {
         return this.loadMessages();
     },
     methods: {
+        viewRetry(retry) {
+            this.viewingRetry = retry;
+            this.$ui.modal.show('view-retry');
+        },
         loadMessages() {
             this.$httpBasic.get('/mail/sent', {name: 'get-mail'})
                 .then(response => this.sent = response.data)
@@ -49,8 +58,7 @@ export default {
     computed: {
         sentMessages() {
             return this.sent.map(sent => {
-                sent.string_to = sent.to.join(', ')
-                sent.status = (sent.is_error ? 'Failed' : (sent.is_sent ? 'Sent' : 'Pending'));
+                sent.string_to = (sent.to ?? []).join(', ')
                 return sent;
             })
         }

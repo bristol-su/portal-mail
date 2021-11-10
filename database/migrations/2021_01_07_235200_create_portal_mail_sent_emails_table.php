@@ -17,19 +17,21 @@ class CreatePortalMailSentEmailsTable extends Migration
             $table->bigIncrements('id');
             $table->string('subject')->nullable();
             $table->string('content')->nullable();
-            $table->text('to');
-            $table->unsignedInteger('from_id');
+            $table->text('to')->nullable();
+            $table->unsignedInteger('from_id')->nullable();
             $table->text('cc')->nullable();
             $table->text('bcc')->nullable();
             $table->boolean('is_sent')->default(false);
             $table->boolean('is_error')->default(false);
             $table->text('error_message')->nullable();
-            $table->unsignedInteger('tries')->default(0);
-            $table->uuid('uuid');
+            $table->integer('priority')->nullable();
+            $table->string('reply_to')->nullable();
+            $table->uuid('uuid')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->text('sent_via')->nullable();
             $table->text('notes')->nullable();
             $table->timestamp('sent_at')->nullable();
+            $table->unsignedInteger('resend_id')->nullable();
             $table->timestamps();
         });
     }

@@ -16,11 +16,13 @@ class EmailAddressController extends Controller
         $this->authorize('manage-mail');
 
         $request->validate([
-            'email' => 'email:rfc,dns|unique:portal_mail_email_addresses,email'
+            'email' => 'required|email:rfc,dns|unique:portal_mail_email_addresses,email',
+            'name' => 'required|string|min:1|max:254'
         ]);
 
         return EmailAddress::create([
-            'email' => $request->input('email')
+            'email' => $request->input('email'),
+            'name' => $request->input('name')
         ]);
     }
 

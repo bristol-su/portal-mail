@@ -31,9 +31,13 @@ class SendEmail extends Action
                         ->toArray()
                     )
                 )
+                ->withField(Field::text('reply_to')->setLabel('The email to reply to. Defaults to the email being used to send.')
+                    ->setTooltip('When a user replies to the email, their reply will be routed to this email address.')
+                    ->setRequired(false)->setValue(null))
+
             )
             ->withGroup(Group::make('Content')
-                ->withField(Field::html('Subject')->setLabel('Subject')->setHint('The subject of the email')->setRequired(false))
+                ->withField(Field::html('subject')->setLabel('Subject')->setHint('The subject of the email')->setRequired(false))
                 ->withField(Field::html('content')->setLabel('Email Body')->setHint('The contents of the email')->setRequired(true))
                 ->withField(Field::text('attachments')->setLabel('Attachments')->setHint('A comma separated list of URLs')->setRequired(false))
             )
@@ -41,6 +45,11 @@ class SendEmail extends Action
                 ->withField(Field::text('notes')->setLabel('Private notes to help you identify the source or context about the email')
                     ->setTooltip('These notes will stay hidden from the email recipient')
                     ->setRequired(false)
+                )
+                ->withField(Field::select('priority')->setLabel('Priority')->withNullOption('No priority set')
+                    ->setHint('1 is high priority, 5 is low priority')->setRequired(false)->setValue(null)
+                    ->withOption(1, 'Highest')->withOption(2, 'High')
+                    ->withOption(3, 'Medium')->withOption(4, 'Low')->withOption(5, 'Lowest')
                 )
             )
             ->form();
@@ -67,6 +76,8 @@ class SendEmail extends Action
         $payload->setSubject($this->option('subject'));
         $payload->setBcc(array_filter(explode(',', $this->option('bcc', ''))));
         $payload->setCc(array_filter(explode(',', $this->option('cc', ''))));
+        $payload->setPriority($this->option('priority', null));
+        $payload->setReplyTo($this->option('reply_to', null));
 
         $files = array_filter(explode(',', $this->option('attachments', '')));
         if(!empty($files)) {

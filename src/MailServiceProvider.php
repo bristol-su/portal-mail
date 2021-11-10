@@ -92,17 +92,7 @@ class MailServiceProvider extends ServiceProvider
 
             return array_merge(
                 is_array($existingData) ? $existingData : [],
-                $mailable instanceof IsRecorded ? [
-                    '__bristol_su_mail_to' => $mailable->payload()->getTo(),
-                    '__bristol_su_mail_cc' => $mailable->payload()->getCc(),
-                    '__bristol_su_mail_bcc' => $mailable->payload()->getBcc(),
-                    '__bristol_su_mail_content' => $mailable->payload()->getContent(),
-                    '__bristol_su_mail_subject' => $mailable->payload()->getSubject(),
-                    '__bristol_su_mail_from_id' => $mailable->payload()->getFrom()->id,
-                    '__bristol_su_mail_notes' => $mailable->payload()->getNotes(),
-                    '__bristol_su_mail_sent_via' => $mailable->payload()->getSentVia(),
-                    '__bristol_su_mail_attachments' => collect($mailable->payload()->getAttachments())->pluck('id')->toArray()
-                ] : [],
+                $mailable instanceof IsRecorded ? ['__bristol_su_mail_payload' => $mailable->payload()] : [],
                 [
                     '__bristol_su_mail_uuid' => Str::uuid(),
                     '__bristol_su_mail_user_id' => app(Authentication::class)->hasUser() ? app(Authentication::class)->getUser()->id() : null,

@@ -18,13 +18,17 @@ class SentMail extends Model
         'to' => 'array',
         'bcc' => 'array',
         'is_sent' => 'boolean',
-        'tries' => 'integer',
         'is_error' => 'boolean',
-        'sent_at' => 'datetime'
+        'sent_at' => 'datetime',
+        'priority' => 'integer'
     ];
 
     protected $with = [
-        'from', 'attachments'
+        'from', 'attachments', 'retries'
+    ];
+
+    protected $appends = [
+        'status'
     ];
 
     protected $fillable = [
@@ -41,9 +45,46 @@ class SentMail extends Model
         'is_error',
         'error_message',
         'sent_via',
-        'tries',
-        'sent_at'
+        'sent_at',
+        'priority',
+        'reply_to',
+        'resend_id'
     ];
+
+    public function getStatusAttribute(): string
+    {
+        // If has a successful resend, it's been sent.
+        if($this->resend_id === null && $this->retries()->where(['is_error' => false, 'is_sent' => true])->count() > 0) {
+            return 'Sent';
+        }
+        if($this->is_error) {
+            return 'Failed';
+        }
+        if($this->is_sent) {
+            return 'Sent';
+        }
+        return 'Pending';
+
+    }
+
+    public function getSentAtAttribute($value)
+    {
+        $retry = $this->retries()->where(['is_error' => false, 'is_sent' => true])->first();
+        if($this->resend_id === null && $retry !== null) {
+            return $retry->sent_at;
+        }
+        return $value;
+    }
+
+    public function retries()
+    {
+        return $this->hasMany(SentMail::class, 'resend_id');
+    }
+
+    public function parentEmail()
+    {
+        return $this->belongsTo(SentMail::class, 'resend_id');
+    }
 
     protected static function booted()
     {
@@ -64,12 +105,15 @@ class SentMail extends Model
 
     public function asPayload(): EmailPayload
     {
-        return (new EmailPayload($this->content, $this->to, $this->from))
+        return (new EmailPayload($this->content = '', $this->to ?? [], $this->from))
             ->setSubject($this->subject)
-            ->setCc($this->cc)
-            ->setBcc($this->bcc)
+            ->setCc($this->cc ?? [])
+            ->setBcc($this->bcc ?? [])
             ->setNotes($this->notes)
             ->setSentVia($this->sent_via)
+            ->setPriority($this->priority)
+            ->setReplyTo($this->reply_to)
+            ->setResendId($this->resend_id)
             ->setAttachments($this->attachments()->get()->all());
     }
 

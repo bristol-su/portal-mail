@@ -22,7 +22,9 @@ class Attachment extends Model
     protected static function booted()
     {
         static::deleting(function (Attachment $model) {
-            Storage::delete($model->path);
+            if(Attachment::where('path', $model->path)->count() === 1) {
+                Storage::delete($model->path);
+            }
         });
     }
 
