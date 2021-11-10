@@ -64,7 +64,23 @@ class SentMail extends Model
             return 'Sent';
         }
         return 'Pending';
+    }
 
+    public function getContentAttribute($value)
+    {
+        $json = json_decode($value, true);
+        if(json_last_error() === JSON_ERROR_NONE) {
+            return $json;
+        }
+        return $value;
+    }
+
+    public function setContentAttribute($value)
+    {
+        if(is_array($value)) {
+            $value = json_encode($value);
+        }
+        $this->attributes['content'] = $value;
     }
 
     public function getSentAtAttribute($value)
@@ -105,7 +121,7 @@ class SentMail extends Model
 
     public function asPayload(): EmailPayload
     {
-        return (new EmailPayload($this->content = '', $this->to ?? [], $this->from))
+        return (new EmailPayload(($this->content === null ? [] : $this->content), $this->to ?? [], $this->from))
             ->setSubject($this->subject)
             ->setCc($this->cc ?? [])
             ->setBcc($this->bcc ?? [])

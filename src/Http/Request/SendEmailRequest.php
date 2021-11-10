@@ -12,6 +12,7 @@ use BristolSU\Support\Authentication\Contracts\Authentication;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -26,10 +27,10 @@ class SendEmailRequest extends FormRequest
     public function rules()
     {
         return [
-            'content' => 'required|string|max:9000000',
+            'content' => 'required',
             'to' => 'required|array|min:1',
             'to.*' => 'string|email:rfc,dns',
-            'from' => ['required', 'integer', 'exists:portal_mail_email_addresses,id',
+            'from_id' => ['required', 'integer', 'exists:portal_mail_email_addresses,id',
                 function ($attribute, $value, $fail) {
                     $email = EmailAddress::find($value);
                     if($email === null) {
@@ -81,22 +82,48 @@ class SendEmailRequest extends FormRequest
         ];
     }
 
+    /**
+     * Configure the validator instance.
+     *
+     * @param  \Illuminate\Validation\Validator  $validator
+     * @return void
+     */
+    public function withValidator($validator)
+    {
+        $contentIsArray = fn(Fluent $input) => is_array($input->get('content'));
+        $actionIsGiven = fn(Fluent $input) => array_key_exists('action', $input->get('content', [])) && is_array($input->get('content', [])['action']);
+        $validator->sometimes('content', 'string|max:9000000', fn(Fluent $input) => is_string($input->get('content')));
+        $validator->sometimes('content', 'array', $contentIsArray);
+        $validator->sometimes('content.greeting', 'sometimes|string|max:255', $contentIsArray);
+        $validator->sometimes('content.salutation', 'sometimes|string|max:255', $contentIsArray);
+        $validator->sometimes('content.before_lines', 'sometimes|array', $contentIsArray);
+        $validator->sometimes('content.before_lines.*', 'string', $contentIsArray);
+        $validator->sometimes('content.after_lines', 'sometimes|array', $contentIsArray);
+        $validator->sometimes('content.after_lines.*', 'string', $contentIsArray);
+        $validator->sometimes('content.action', 'sometimes|array', $contentIsArray);
+        $validator->sometimes('content.action.text', 'required|string', fn(Fluent $input) => $contentIsArray($input) && $actionIsGiven($input));
+        $validator->sometimes('content.action.url', 'required|url', fn(Fluent $input) => $contentIsArray($input) && $actionIsGiven($input));
+        $validator->sometimes('content.action.type', 'required|string|in:error,success,action', fn(Fluent $input) => $contentIsArray($input) && $actionIsGiven($input));
+    }
+
     public function toEmailPayload(): EmailPayload
     {
-        $email = EmailAddress::findOrFail($this->input('from'));
-        $payload = (new EmailPayload($this->input('content'), $this->input('to'), $email))
-            ->setSubject($this->input('subject', null))
-            ->setCc($this->input('cc') ?? [])
-            ->setBcc($this->input('bcc') ?? [])
-            ->setNotes($this->input('notes', null))
-            ->setPriority($this->input('priority', null))
-            ->setReplyTo($this->input('reply_to', null))
-            ->setNotes($this->input('notes', null))
-            ->setResendId($this->input('resend_id', null))
-            ->setSentVia($this->input('via', 'api'));
+        $data = $this->validated();
+
+        $email = EmailAddress::findOrFail(data_get($data, 'from_id'));
+        $payload = (new EmailPayload(data_get($data, 'content'), data_get($data, 'to'), $email))
+            ->setSubject(data_get($data, 'subject'))
+            ->setCc(data_get($data, 'cc') ?? [])
+            ->setBcc(data_get($data, 'bcc') ?? [])
+            ->setNotes(data_get($data, 'notes'))
+            ->setPriority(data_get($data, 'priority'))
+            ->setReplyTo(data_get($data, 'reply_to'))
+            ->setNotes(data_get($data, 'notes'))
+            ->setResendId(data_get($data, 'resend_id'))
+            ->setSentVia(data_get($data, 'via', 'api'));
 
         $existingAttachments = [];
-        foreach($this->input('existing_attachments', []) as $attachmentId) {
+        foreach(data_get($data, 'existing_attachments', []) as $attachmentId) {
             $existingAttachments[] = Attachment::findOrFail($attachmentId);
         }
 
@@ -105,10 +132,10 @@ class SendEmailRequest extends FormRequest
 
     private function uploadFiles(EmailPayload $payload, array $existingAttachments): EmailPayload
     {
-        $inputAttachments = $this->input('attachments', []);
-        $fileAttachments = $this->file('attachments', []);
-
-        $uploadAttachments = new UploadAttachments(array_merge($inputAttachments, $fileAttachments));
+        if(!array_key_exists('attachments', $this->validated()) || empty($this->validated()['attachments'])) {
+            return $payload;
+        }
+        $uploadAttachments = new UploadAttachments(data_get($this->validated(), 'attachments', []));
         if($payload->isResend()) {
             $uploadAttachments->appendExisting($existingAttachments);
         }
@@ -128,10 +155,10 @@ class SendEmailRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         $data = collect($this->all())
-            ->only(['content', 'to', 'from', 'subject', 'cc', 'bcc', 'priority', 'reply_to', 'resend_id', 'notes', 'via'])
+            ->only(['content', 'to', 'from_id', 'subject', 'cc', 'bcc', 'priority', 'reply_to', 'resend_id', 'notes', 'via'])
             ->except(array_map(fn(string $key) => Str::before($key, '.'), $validator->errors()->keys()));
 
-        if($data['from']) {
+        if($data->has('from_id') && $data->get('from_id')) {
             SentMail::create($data->merge([
                 'is_error' => true,
                 'is_sent' => false,
@@ -142,8 +169,8 @@ class SendEmailRequest extends FormRequest
                     'data' => collect($this->all())->only(array_map(fn(string $key) => Str::before($key, '.'), $validator->errors()->keys()))->toArray(),
                     'errors' => $validator->errors()->toArray(),
                 ]),
-                'sent_via' => $data->get('via', null),
-                'from_id' => $data->get('from')
+                'sent_via' => $data->get('via'),
+                'from_id' => $data->get('from_id')
             ])->toArray());
         }
 

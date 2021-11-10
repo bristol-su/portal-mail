@@ -1,88 +1,6 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ "./node_modules/@bristol-su/portal-ui-kit/src/generator/schema/Field.js":
-/*!******************************************************************************!*\
-  !*** ./node_modules/@bristol-su/portal-ui-kit/src/generator/schema/Field.js ***!
-  \******************************************************************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
-/* harmony export */ });
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (class {
-
-    constructor(type, id) {
-        this.schema = {
-            id: id,
-            type: type,
-            label: null,
-            value: null,
-            visible: true,
-            disabled: false,
-            required: false,
-            hint: null,
-            tooltip: null,
-            errorKey: id
-        }
-    }
-
-    id(id) {
-        this.schema.id = id;
-        return this;
-    }
-
-    errorKey(errorKey) {
-        this.schema.errorKey = errorKey;
-        return this;
-    }
-
-    label(label) {
-        this.schema.label = label;
-        return this;
-    }
-
-    value(value) {
-        this.schema.value = value;
-        return this;
-    }
-
-    visible(visible) {
-        this.schema.visible = visible;
-        return this;
-    }
-
-    disabled(disabled) {
-        this.schema.disabled = disabled;
-        return this;
-    }
-
-    required(required) {
-        this.schema.required = required;
-        return this;
-    }
-
-    hint(hint) {
-        this.schema.hint = hint;
-        return this;
-    }
-
-    tooltip(tooltip) {
-        this.schema.tooltip = tooltip;
-        return this;
-    }
-
-    asJson() {
-        return this.schema;
-    }
-
-});
-
-
-/***/ }),
-
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/address/AddAddress.vue?vue&type=script&lang=js&":
 /*!*************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/address/AddAddress.vue?vue&type=script&lang=js& ***!
@@ -617,6 +535,150 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/MailBuilder.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/MailBuilder.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _bristol_su_portal_ui_kit_src_generator_schema_Field__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @bristol-su/portal-ui-kit/src/generator/schema/Field */ "../../../../../support/portal-ui-kit/src/generator/schema/Field.js");
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
+  name: "MailBuilder",
+  props: {
+    value: {
+      required: true,
+      type: Object
+    },
+    from: {
+      required: true,
+      type: Array,
+      "default": function _default() {
+        return [];
+      }
+    },
+    resendId: {
+      required: false,
+      type: Number
+    },
+    uploadedAttachments: {
+      required: false,
+      type: Array,
+      "default": function _default() {
+        return [];
+      }
+    }
+  },
+  data: function data() {
+    return {
+      alternativeContent: null,
+      alternativeContentType: 'html'
+    };
+  },
+  computed: {
+    data: {
+      get: function get() {
+        var contentType = this.value.content ? typeof this.value.content === 'string' || this.value.content instanceof String ? 'html' : 'builder' : 'html';
+        return _objectSpread({
+          html_content: contentType === 'html' ? this.value.content : null,
+          content_type: contentType,
+          greeting: contentType === 'builder' && this.value.content.hasOwnProperty('greeting') ? this.value.content.greeting : null,
+          before_lines: contentType === 'builder' && this.value.content.hasOwnProperty('before_lines') ? this.value.content.before_lines : null,
+          action_text: contentType === 'builder' && this.value.content.hasOwnProperty('action') && this.value.content.action.hasOwnProperty('text') ? this.value.content.action.text : null,
+          action_url: contentType === 'builder' && this.value.content.hasOwnProperty('action') && this.value.content.action.hasOwnProperty('url') ? this.value.content.action.url : null,
+          action_type: contentType === 'builder' && this.value.content.hasOwnProperty('action') && this.value.content.action.hasOwnProperty('type') ? this.value.content.action.type : null,
+          after_lines: contentType === 'builder' && this.value.content.hasOwnProperty('after_lines') ? this.value.content.after_lines : null,
+          salutation: contentType === 'builder' && this.value.content.hasOwnProperty('salutation') ? this.value.content.salutation : null
+        }, this.value);
+      },
+      set: function set(val) {
+        var _val$cc, _val$bcc, _val$subject, _val$notes, _val$priority, _val$reply_to, _val$greeting, _val$action_text, _val$action_url, _val$action_type, _val$salutation;
+
+        var newValue = {
+          from_id: val.from_id,
+          to: val.to,
+          cc: (_val$cc = val.cc) !== null && _val$cc !== void 0 ? _val$cc : [],
+          bcc: (_val$bcc = val.bcc) !== null && _val$bcc !== void 0 ? _val$bcc : [],
+          subject: (_val$subject = val.subject) !== null && _val$subject !== void 0 ? _val$subject : null,
+          notes: (_val$notes = val.notes) !== null && _val$notes !== void 0 ? _val$notes : null,
+          priority: (_val$priority = val.priority) !== null && _val$priority !== void 0 ? _val$priority : null,
+          reply_to: (_val$reply_to = val.reply_to) !== null && _val$reply_to !== void 0 ? _val$reply_to : null,
+          existing_attachments: val.existing_attachments,
+          attachments: val.attachments
+        };
+        var htmlContent = this.alternativeContentType === 'html' ? this.alternativeContent : val.html_content;
+        var builderContent = this.alternativeContentType === 'builder' ? this.alternativeContent : {
+          greeting: (_val$greeting = val.greeting) !== null && _val$greeting !== void 0 ? _val$greeting : null,
+          before_lines: Array.isArray(val.before_lines) ? val.before_lines : [val.before_lines],
+          action: {
+            text: (_val$action_text = val.action_text) !== null && _val$action_text !== void 0 ? _val$action_text : null,
+            url: (_val$action_url = val.action_url) !== null && _val$action_url !== void 0 ? _val$action_url : null,
+            type: (_val$action_type = val.action_type) !== null && _val$action_type !== void 0 ? _val$action_type : null
+          },
+          after_lines: Array.isArray(val.after_lines) ? val.after_lines : [val.after_lines],
+          salutation: (_val$salutation = val.salutation) !== null && _val$salutation !== void 0 ? _val$salutation : null
+        };
+
+        if (val.content_type === 'html') {
+          newValue.content = htmlContent;
+          this.alternativeContentType = 'builder';
+          this.alternativeContent = builderContent;
+        } else {
+          newValue.content = builderContent;
+          this.alternativeContentType = 'html';
+          this.alternativeContent = htmlContent;
+        }
+
+        this.$emit('input', newValue);
+      }
+    },
+    form: function form() {
+      var recipientsGroup = this.$tools.generator.group.newGroup('Recipients').withField(this.$tools.generator.field.select('from_id').setOptions(this.from.map(function (e) {
+        return {
+          id: e.id,
+          value: e.email
+        };
+      })).label('From').hint('Who to send the email from.').tooltip('This will appear as the address the email is sent from').required(true)).withField(this.$tools.generator.field.tags('to').label('To *').hint('Who to send the email to.').tooltip('You may enter multiple recipients by pressing enter.').required(false)).withField(this.$tools.generator.field.tags('cc').label('CC').hint('Who to cc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.tags('bcc').label('Bcc').hint('Who to bcc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.text('reply_to').label('Reply To').hint('The email that replies should be directed to.').required(false));
+      var contentGroup = this.$tools.generator.group.newGroup('Content').withField(this.$tools.generator.field.text('subject').label('Subject').hint('The subject of the message.').tooltip('This will appear as the subject on the email.').required(false)).withField(this.$tools.generator.field.radios('content_type').label('Content Type').hint('The type of content you want to send.').value('builder').withOption('html', 'HTML').withOption('builder', 'Builder').required(false)).withField(new _bristol_su_portal_ui_kit_src_generator_schema_Field__WEBPACK_IMPORTED_MODULE_0__["default"]('html', 'html_content').label('Content').hint('The body of the email').required(false)).withField(this.$tools.generator.field.text('greeting').label('Greeting').hint('The first line of the message').tooltip('e.g. Dear X,').required(false)).withField(this.$tools.generator.field.textArea('before_lines').label('Before Lines').hint('Lines that appear before the action').required(false)).withField(this.$tools.generator.field.text('action_text').label('Action Name').hint('The text to show on the action button').required(false)).withField(this.$tools.generator.field.text('action_url').label('Action URL').hint('The URL to send the user to when they click the button').required(false)).withField(this.$tools.generator.field.select('action_type').label('Action Type').withOption('action', 'Normal').withOption('error', 'Error').withOption('success', 'Success').value('action').hint('The text to show on the action button').required(false)).withField(this.$tools.generator.field.textArea('after_lines').label('After Lines').hint('Lines that appear after the action').required(false)).withField(this.$tools.generator.field.textArea('salutation').label('Salutation').hint('The last line of the message').tooltip('e.g. Many thanks,').required(false));
+      contentGroup.withField(this.$tools.generator.field.file('attachments').label('Attachments').multiple(true).hint('Attachments for the email.').value([]).tooltip('You may select multiple files.').required(false));
+
+      if (this.resendId && this.data.existing_attachments.length > 0) {
+        contentGroup.withField(this.$tools.generator.field.checkList('existing_attachments_value').label('Uploaded Attachments').hint('Attachments that have already been uploaded in a previous attempt').required(false).value(this.data.existing_attachments).setOptions(this.uploadedAttachments.map(function (a) {
+          return {
+            id: a.id,
+            value: a.value
+          };
+        })));
+      }
+
+      var metaGroup = this.$tools.generator.group.newGroup('Meta Data').withField(this.$tools.generator.field.text('notes').label('Notes').hint('Notes to help you identify the email later.').tooltip('These notes aren\'t shown to the user, and will be kept private.').required(false)).withField(this.$tools.generator.field.select('priority').label('Priority').hint('1 is high priority, 5 is low priority').required(false).withOption(1, 'Highest').withOption(2, 'High').withOption(3, 'Medium').withOption(4, 'Low').withOption(5, 'Lowest'));
+      return this.$tools.generator.form.newForm().withGroup(recipientsGroup).withGroup(contentGroup).withGroup(metaGroup);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/SendEmail.vue?vue&type=script&lang=js&":
 /*!*********************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/SendEmail.vue?vue&type=script&lang=js& ***!
@@ -628,7 +690,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _bristol_su_portal_ui_kit_src_generator_schema_Field__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @bristol-su/portal-ui-kit/src/generator/schema/Field */ "./node_modules/@bristol-su/portal-ui-kit/src/generator/schema/Field.js");
+/* harmony import */ var _MailBuilder__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MailBuilder */ "./resources/js/components/send/MailBuilder.vue");
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e3) { throw _e3; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e4) { didErr = true; err = _e4; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
@@ -643,9 +705,15 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
+//
+//
+//
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: "SendEmail",
+  components: {
+    MailBuilder: _MailBuilder__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
   props: {
     from: {
       required: true,
@@ -657,38 +725,45 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   },
   data: function data() {
     return {
-      initialData: {},
-      showForm: false
+      showForm: false,
+      newMail: {
+        from_id: null,
+        to: [],
+        cc: [],
+        bcc: [],
+        subject: null,
+        notes: null,
+        content: [],
+        priority: null,
+        reply_to: null,
+        existing_attachments: []
+      },
+      uploadedAttachments: []
     };
   },
   created: function created() {
     var _this = this;
 
-    if (this.query.resend_id) {
-      this.$httpBasic.get('/mail/sent/' + this.query.resend_id, {
+    if (this.resendId) {
+      this.$httpBasic.get('/mail/sent/' + this.resendId, {
         name: 'resent-message'
       }).then(function (response) {
-        var _response$data$cc, _response$data$bcc, _response$data$subjec, _response$data$notes, _response$data$conten, _response$data$priori, _response$data$reply_;
+        var _response$data$attach, _response$data$from_i, _response$data$to, _response$data$cc, _response$data$bcc, _response$data$subjec, _response$data$notes, _response$data$conten, _response$data$priori, _response$data$reply_, _this$uploadedAttachm;
 
-        return _this.initialData = {
-          from: response.data.from.id,
-          to: response.data.to,
-          cc: (_response$data$cc = response.data.cc) !== null && _response$data$cc !== void 0 ? _response$data$cc : '',
-          bcc: (_response$data$bcc = response.data.bcc) !== null && _response$data$bcc !== void 0 ? _response$data$bcc : '',
+        _this.uploadedAttachments = (_response$data$attach = response.data.attachments) !== null && _response$data$attach !== void 0 ? _response$data$attach : [];
+        _this.newMail = {
+          from_id: (_response$data$from_i = response.data.from_id) !== null && _response$data$from_i !== void 0 ? _response$data$from_i : null,
+          to: (_response$data$to = response.data.to) !== null && _response$data$to !== void 0 ? _response$data$to : [],
+          cc: (_response$data$cc = response.data.cc) !== null && _response$data$cc !== void 0 ? _response$data$cc : [],
+          bcc: (_response$data$bcc = response.data.bcc) !== null && _response$data$bcc !== void 0 ? _response$data$bcc : [],
           subject: (_response$data$subjec = response.data.subject) !== null && _response$data$subjec !== void 0 ? _response$data$subjec : null,
           notes: (_response$data$notes = response.data.notes) !== null && _response$data$notes !== void 0 ? _response$data$notes : null,
-          content: (_response$data$conten = response.data.content) !== null && _response$data$conten !== void 0 ? _response$data$conten : null,
+          content: (_response$data$conten = response.data.content) !== null && _response$data$conten !== void 0 ? _response$data$conten : [],
           priority: (_response$data$priori = response.data.priority) !== null && _response$data$priori !== void 0 ? _response$data$priori : null,
           reply_to: (_response$data$reply_ = response.data.reply_to) !== null && _response$data$reply_ !== void 0 ? _response$data$reply_ : null,
-          existing_attachments_for_select: response.data.attachments.map(function (a) {
-            return {
-              id: a.id,
-              text: a.filename
-            };
-          }),
-          existing_attachments: response.data.attachments.map(function (a) {
+          existing_attachments: (_this$uploadedAttachm = _this.uploadedAttachments.map(function (a) {
             return a.id;
-          })
+          })) !== null && _this$uploadedAttachm !== void 0 ? _this$uploadedAttachm : []
         };
       })["catch"](function (error) {
         return _this.$notify.alert('Could not load previous mail: ' + error.message);
@@ -700,28 +775,31 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     }
   },
   methods: {
-    send: function send(data) {
+    send: function send() {
       var _this2 = this;
 
+      var data = this.newMail;
       var formData = new FormData();
+      formData.append('from_id', data.from_id);
+      formData.append('subject', data.subject);
+      formData.append('notes', data.notes);
+      formData.append('via', 'inbox');
+      formData.append('reply_to', data.reply_to);
+      formData.append('priority', data.priority);
 
-      if (data.attachments.length > 0) {
-        var _iterator = _createForOfIteratorHelper(data.attachments),
-            _step;
+      var _iterator = _createForOfIteratorHelper(data.attachments),
+          _step;
 
-        try {
-          for (_iterator.s(); !(_step = _iterator.n()).done;) {
-            var attachment = _step.value;
-            formData.append('attachments[]', attachment);
-          }
-        } catch (err) {
-          _iterator.e(err);
-        } finally {
-          _iterator.f();
+      try {
+        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+          var attachment = _step.value;
+          formData.append('attachments[]', attachment);
         }
+      } catch (err) {
+        _iterator.e(err);
+      } finally {
+        _iterator.f();
       }
-
-      formData.append('from', data.from);
 
       var _iterator2 = _createForOfIteratorHelper(data.to),
           _step2;
@@ -765,31 +843,66 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         _iterator4.f();
       }
 
-      formData.append('subject', data.subject);
-      formData.append('notes', data.notes);
-      formData.append('content', data.content);
-      formData.append('via', 'inbox');
-      formData.append('reply_to', data.reply_to);
-      formData.append('priority', data.priority);
+      if (typeof data.content === 'string' || data.content instanceof String) {
+        formData.append('content', data.content);
+      } else {
+        var _data$content, _content$action;
 
-      if (data.existing_attachments && data.existing_attachments.length > 0) {
-        var _iterator5 = _createForOfIteratorHelper(data.existing_attachments),
+        var content = (_data$content = data.content) !== null && _data$content !== void 0 ? _data$content : {};
+        var action = (_content$action = content.action) !== null && _content$action !== void 0 ? _content$action : {};
+        formData.append('content[greeting]', content.greeting);
+        formData.append('content[action][text]', action.text);
+        formData.append('content[action][url]', action.url);
+        formData.append('content[action][type]', action.type);
+        formData.append('content[salutation]', data.salutation);
+
+        var _iterator5 = _createForOfIteratorHelper(content.before_lines),
             _step5;
 
         try {
           for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-            var existing_attachments = _step5.value;
-            formData.append('existing_attachments[]', existing_attachments);
+            var line = _step5.value;
+            formData.append('content[before_lines][]', line);
           }
         } catch (err) {
           _iterator5.e(err);
         } finally {
           _iterator5.f();
         }
+
+        var _iterator6 = _createForOfIteratorHelper(content.after_lines),
+            _step6;
+
+        try {
+          for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
+            var _line = _step6.value;
+            formData.append('content[after_lines][]', _line);
+          }
+        } catch (err) {
+          _iterator6.e(err);
+        } finally {
+          _iterator6.f();
+        }
       }
 
-      if (this.query.resend_id) {
-        formData.append('resend_id', this.query.resend_id);
+      if (data.existing_attachments && data.existing_attachments.length > 0) {
+        var _iterator7 = _createForOfIteratorHelper(data.existing_attachments),
+            _step7;
+
+        try {
+          for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+            var existing_attachments = _step7.value;
+            formData.append('existing_attachments[]', existing_attachments);
+          }
+        } catch (err) {
+          _iterator7.e(err);
+        } finally {
+          _iterator7.f();
+        }
+      }
+
+      if (this.resendId) {
+        formData.append('resend_id', this.resendId);
       }
 
       this.$httpBasic.post('/mail/send', formData, {
@@ -806,27 +919,14 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     preview: function preview(data) {}
   },
   computed: {
-    query: function query() {
-      return Object.fromEntries(new URLSearchParams(window.location.search).entries());
-    },
-    form: function form() {
-      var _this$query$resend_id;
+    resendId: function resendId() {
+      var resendId = Object.fromEntries(new URLSearchParams(window.location.search).entries()).resendId;
 
-      var form = this.$tools.generator.form.newForm().withField(this.$tools.generator.field.select('from').setOptions(this.from.map(function (e) {
-        return {
-          id: e.id,
-          value: e.email
-        };
-      })).label('From').hint('Who to send the email from.').tooltip('This will appear as the address the email is sent from').required(true)).withField(this.$tools.generator.field.tags('to').label('To *').hint('Who to send the email to.').tooltip('You may enter multiple recipients by pressing enter.').required(false)).withField(this.$tools.generator.field.tags('cc').label('CC').hint('Who to cc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.tags('bcc').label('Bcc').hint('Who to bcc the email to.').tooltip('You may enter multiple recipients by pressing enter.').value([]).required(false)).withField(this.$tools.generator.field.text('subject').label('Subject').hint('The subject of the message.').tooltip('This will appear as the subject on the email.').required(false)).withField(this.$tools.generator.field.text('notes').label('Notes').hint('Notes to help you identify the email later.').tooltip('These notes aren\'t shown to the user, and will be kept private.').required(false)).withField(new _bristol_su_portal_ui_kit_src_generator_schema_Field__WEBPACK_IMPORTED_MODULE_0__["default"]('html', 'content').label('Content').hint('The body of the email').required(false)).withField(this.$tools.generator.field.select('priority').label('Priority').hint('1 is high priority, 5 is low priority').required(false).withOption(1, 'Highest').withOption(2, 'High').withOption(3, 'Medium').withOption(4, 'Low').withOption(5, 'Lowest')).withField(this.$tools.generator.field.text('reply_to').label('Reply To').hint('The email that replies should be directed to.').required(false)).withField(this.$tools.generator.field.file('attachments').label('Attachments').multiple(true).hint('Attachments for the email.').value([]).tooltip('You may select multiple files.').required(false));
-
-      if (Object.entries((_this$query$resend_id = this.query.resend_id) !== null && _this$query$resend_id !== void 0 ? _this$query$resend_id : {}).length > 0 && this.initialData.existing_attachments.length > 0) {
-        console.log(this.initialData.existing_attachments.map(function (e) {
-          return e.id;
-        }));
-        form.withField(this.$tools.generator.field.checkList('existing_attachments').label('Uploaded Attachments').hint('Attachments that have already been uploaded in a previous attempt').required(false).value(this.initialData.existing_attachments).setOptions(this.initialData.existing_attachments_for_select));
+      if (resendId) {
+        resendId = Number(resendId);
       }
 
-      return form;
+      return resendId;
     }
   }
 });
@@ -1022,6 +1122,109 @@ __webpack_require__.r(__webpack_exports__);
     }
   }
 });
+
+/***/ }),
+
+/***/ "../../../../../support/portal-ui-kit/src/generator/schema/Field.js":
+/*!**************************************************************************!*\
+  !*** ../../../../../support/portal-ui-kit/src/generator/schema/Field.js ***!
+  \**************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ _default)
+/* harmony export */ });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var _default = /*#__PURE__*/function () {
+  function _default(type, id) {
+    _classCallCheck(this, _default);
+
+    this.schema = {
+      id: id,
+      type: type,
+      label: null,
+      value: null,
+      visible: true,
+      disabled: false,
+      required: false,
+      hint: null,
+      tooltip: null,
+      errorKey: id
+    };
+  }
+
+  _createClass(_default, [{
+    key: "id",
+    value: function id(_id) {
+      this.schema.id = _id;
+      return this;
+    }
+  }, {
+    key: "errorKey",
+    value: function errorKey(_errorKey) {
+      this.schema.errorKey = _errorKey;
+      return this;
+    }
+  }, {
+    key: "label",
+    value: function label(_label) {
+      this.schema.label = _label;
+      return this;
+    }
+  }, {
+    key: "value",
+    value: function value(_value) {
+      this.schema.value = _value;
+      return this;
+    }
+  }, {
+    key: "visible",
+    value: function visible(_visible) {
+      this.schema.visible = _visible;
+      return this;
+    }
+  }, {
+    key: "disabled",
+    value: function disabled(_disabled) {
+      this.schema.disabled = _disabled;
+      return this;
+    }
+  }, {
+    key: "required",
+    value: function required(_required) {
+      this.schema.required = _required;
+      return this;
+    }
+  }, {
+    key: "hint",
+    value: function hint(_hint) {
+      this.schema.hint = _hint;
+      return this;
+    }
+  }, {
+    key: "tooltip",
+    value: function tooltip(_tooltip) {
+      this.schema.tooltip = _tooltip;
+      return this;
+    }
+  }, {
+    key: "asJson",
+    value: function asJson() {
+      return this.schema;
+    }
+  }]);
+
+  return _default;
+}();
+
+
 
 /***/ }),
 
@@ -22744,6 +22947,45 @@ component.options.__file = "resources/js/components/mail/ViewSent.vue"
 
 /***/ }),
 
+/***/ "./resources/js/components/send/MailBuilder.vue":
+/*!******************************************************!*\
+  !*** ./resources/js/components/send/MailBuilder.vue ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _MailBuilder_vue_vue_type_template_id_fdda14f0_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./MailBuilder.vue?vue&type=template&id=fdda14f0&scoped=true& */ "./resources/js/components/send/MailBuilder.vue?vue&type=template&id=fdda14f0&scoped=true&");
+/* harmony import */ var _MailBuilder_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./MailBuilder.vue?vue&type=script&lang=js& */ "./resources/js/components/send/MailBuilder.vue?vue&type=script&lang=js&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! !../../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+/* normalize component */
+;
+var component = (0,_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_2__["default"])(
+  _MailBuilder_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _MailBuilder_vue_vue_type_template_id_fdda14f0_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render,
+  _MailBuilder_vue_vue_type_template_id_fdda14f0_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns,
+  false,
+  null,
+  "fdda14f0",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/send/MailBuilder.vue"
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (component.exports);
+
+/***/ }),
+
 /***/ "./resources/js/components/send/SendEmail.vue":
 /*!****************************************************!*\
   !*** ./resources/js/components/send/SendEmail.vue ***!
@@ -22925,6 +23167,22 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./resources/js/components/send/MailBuilder.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************!*\
+  !*** ./resources/js/components/send/MailBuilder.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MailBuilder_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./MailBuilder.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js??clonedRuleSet-5[0].rules[0].use[0]!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/MailBuilder.vue?vue&type=script&lang=js&");
+ /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (_node_modules_babel_loader_lib_index_js_clonedRuleSet_5_0_rules_0_use_0_node_modules_vue_loader_lib_index_js_vue_loader_options_MailBuilder_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
 /***/ "./resources/js/components/send/SendEmail.vue?vue&type=script&lang=js&":
 /*!*****************************************************************************!*\
   !*** ./resources/js/components/send/SendEmail.vue?vue&type=script&lang=js& ***!
@@ -23037,6 +23295,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ViewSent_vue_vue_type_template_id_08770a9a_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
 /* harmony export */ });
 /* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ViewSent_vue_vue_type_template_id_08770a9a_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./ViewSent.vue?vue&type=template&id=08770a9a&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/mail/ViewSent.vue?vue&type=template&id=08770a9a&scoped=true&");
+
+
+/***/ }),
+
+/***/ "./resources/js/components/send/MailBuilder.vue?vue&type=template&id=fdda14f0&scoped=true&":
+/*!*************************************************************************************************!*\
+  !*** ./resources/js/components/send/MailBuilder.vue?vue&type=template&id=fdda14f0&scoped=true& ***!
+  \*************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MailBuilder_vue_vue_type_template_id_fdda14f0_scoped_true___WEBPACK_IMPORTED_MODULE_0__.render),
+/* harmony export */   "staticRenderFns": () => (/* reexport safe */ _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MailBuilder_vue_vue_type_template_id_fdda14f0_scoped_true___WEBPACK_IMPORTED_MODULE_0__.staticRenderFns)
+/* harmony export */ });
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_MailBuilder_vue_vue_type_template_id_fdda14f0_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../../node_modules/vue-loader/lib/index.js??vue-loader-options!./MailBuilder.vue?vue&type=template&id=fdda14f0&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/MailBuilder.vue?vue&type=template&id=fdda14f0&scoped=true&");
 
 
 /***/ }),
@@ -23693,6 +23968,41 @@ render._withStripped = true
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/MailBuilder.vue?vue&type=template&id=fdda14f0&scoped=true&":
+/*!****************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/MailBuilder.vue?vue&type=template&id=fdda14f0&scoped=true& ***!
+  \****************************************************************************************************************************************************************************************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "render": () => (/* binding */ render),
+/* harmony export */   "staticRenderFns": () => (/* binding */ staticRenderFns)
+/* harmony export */ });
+var render = function () {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("p-dynamic-form", {
+    ref: "form",
+    attrs: { schema: _vm.form },
+    model: {
+      value: _vm.data,
+      callback: function ($$v) {
+        _vm.data = $$v
+      },
+      expression: "data",
+    },
+  })
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/SendEmail.vue?vue&type=template&id=11e04b98&scoped=true&":
 /*!**************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib/index.js??vue-loader-options!./resources/js/components/send/SendEmail.vue?vue&type=template&id=11e04b98&scoped=true& ***!
@@ -23713,17 +24023,38 @@ var render = function () {
     "p-form-padding",
     [
       _vm.showForm
-        ? _c("p-api-form", {
+        ? _c("mail-builder", {
             attrs: {
-              "initial-data": _vm.initialData,
-              schema: _vm.form,
-              "button-text": "Send",
-              busy: _vm.$isLoading("sending-email"),
-              "busy-text": "Sending",
+              from: _vm.from,
+              "resend-id": _vm.resendId,
+              "uploaded-attachments": _vm.uploadedAttachments,
             },
-            on: { submit: _vm.send },
+            model: {
+              value: _vm.newMail,
+              callback: function ($$v) {
+                _vm.newMail = $$v
+              },
+              expression: "newMail",
+            },
           })
         : _vm._e(),
+      _vm._v(" "),
+      _c(
+        "p-button",
+        {
+          attrs: {
+            busy: _vm.$isLoading("sending-email"),
+            "busy-text": "Sending",
+          },
+          on: {
+            click: function ($event) {
+              $event.preventDefault()
+              return _vm.send.apply(null, arguments)
+            },
+          },
+        },
+        [_vm._v("Send")]
+      ),
     ],
     1
   )

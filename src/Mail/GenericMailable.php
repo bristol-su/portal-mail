@@ -63,8 +63,21 @@ class GenericMailable extends Mailable implements IsRecorded
 
         $this->to($this->emailPayload->getTo());
 
-        return $this->view('portal-mail::emails.email')
+        if($this->emailPayload->isBuilderContent()) {
+            return $this->markdown('notifications::email')->with([
+                'level' => data_get($this->emailPayload->getContent(), 'action.type', null),
+                'greeting' => data_get($this->emailPayload->getContent(), 'greeting', null),
+                'salutation' => data_get($this->emailPayload->getContent(), 'salutation', null),
+                'introLines' => data_get($this->emailPayload->getContent(), 'before_lines', []),
+                'outroLines' => data_get($this->emailPayload->getContent(), 'after_lines', []),
+                'actionText' => data_get($this->emailPayload->getContent(), 'action.text', null),
+                'actionUrl' => data_get($this->emailPayload->getContent(), 'action.url', null),
+                'displayableActionUrl' => str_replace(['mailto:', 'tel:'], '', data_get($this->emailPayload->getContent(), 'action.url', ''))
+            ]);
+        } else {
+            return $this->view('portal-mail::emails.email')
                 ->text('portal-mail::emails.email_plain');
+        }
 
     }
 

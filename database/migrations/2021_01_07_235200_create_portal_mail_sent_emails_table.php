@@ -16,7 +16,7 @@ class CreatePortalMailSentEmailsTable extends Migration
         Schema::create('portal_mail_sent_emails', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('subject')->nullable();
-            $table->string('content')->nullable();
+            $table->longText('content')->nullable();
             $table->text('to')->nullable();
             $table->unsignedInteger('from_id')->nullable();
             $table->text('cc')->nullable();

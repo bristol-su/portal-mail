@@ -21,7 +21,7 @@ class MailSendingListener
                 'to' => $payload->getTo(),
                 'cc' => $payload->getCc(),
                 'bcc' => $payload->getBcc(),
-                'content' => $payload->getContent(),
+                'content' => is_array($payload->getContent()) ? json_encode($payload->getContent()) : $payload->getContent(),
                 'subject' => $payload->getSubject(),
                 'from_id' => $payload->getFrom()->id,
                 'is_sent' => false,

@@ -34,8 +34,8 @@ class SendEmail extends Action
                 ->withField(Field::text('reply_to')->setLabel('The email to reply to. Defaults to the email being used to send.')
                     ->setTooltip('When a user replies to the email, their reply will be routed to this email address.')
                     ->setRequired(false)->setValue(null))
-
             )
+
             ->withGroup(Group::make('Content')
                 ->withField(Field::html('subject')->setLabel('Subject')->setHint('The subject of the email')->setRequired(false))
                 ->withField(Field::html('content')->setLabel('Email Body')->setHint('The contents of the email')->setRequired(true))

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Support\Jsonable;
 class EmailPayload implements Jsonable, Arrayable
 {
 
-    private string $content;
+    private string|array $content;
 
     private array $to;
 
@@ -35,7 +35,7 @@ class EmailPayload implements Jsonable, Arrayable
     private ?int $resendId = null;
 
     public function __construct(
-        string $content, array $to, EmailAddress $from
+        string|array $content, array $to, EmailAddress $from
     )
     {
         $this->content = $content;
@@ -282,21 +282,31 @@ class EmailPayload implements Jsonable, Arrayable
     }
 
     /**
-     * @return string
+     * @return string|array
      */
-    public function getContent(): string
+    public function getContent(): string|array
     {
         return $this->content;
     }
 
     /**
-     * @param string $content
+     * @param string|array $content
      * @return EmailPayload
      */
-    public function setContent(string $content): EmailPayload
+    public function setContent(string|array $content): EmailPayload
     {
         $this->content = $content;
         return $this;
+    }
+
+    public function isBuilderContent(): bool
+    {
+        return is_array($this->content);
+    }
+
+    public function isHtmlContent(): bool
+    {
+        return is_string($this->content);
     }
 
     /**
