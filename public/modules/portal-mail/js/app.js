@@ -139,6 +139,9 @@ __webpack_require__.r(__webpack_exports__);
         return _this.$refs.tabs.selectTab(3);
       });
     }
+  },
+  methods: {
+    sent: function sent() {}
   }
 });
 

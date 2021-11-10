@@ -38,6 +38,11 @@ export default {
         if(Object.fromEntries(new URLSearchParams(window.location.search).entries()).resend_id) {
             this.$nextTick(() => this.$refs.tabs.selectTab(3));
         }
+    },
+    methods: {
+        sent() {
+
+        }
     }
 }
 </script>
