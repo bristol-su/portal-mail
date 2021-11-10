@@ -5,6 +5,8 @@
 </template>
 
 <script>
+import Field from '@bristol-su/portal-ui-kit/src/generator/schema/Field';
+
 export default {
     name: "EditUser",
     data() {
@@ -41,7 +43,7 @@ export default {
         },
         form() {
             return this.$tools.generator.form.newForm()
-                .withField(this.$tools.generator.field.number('user')
+                .withField((new Field('p-user-search', 'user'))
                     .label('User')
                     .hint('The user to grant access to')
                     .required(true)

@@ -1,6 +1,6 @@
 <template>
     <p-form-padding>
-        <mail-builder v-model="newMail" v-if="showForm" :from="from" :resend-id="resendId" :uploaded-attachments="uploadedAttachments">
+        <mail-builder v-model="newMail" v-if="showForm" :resend-id="resendId" :uploaded-attachments="uploadedAttachments">
 
         </mail-builder>
 
@@ -15,13 +15,6 @@ import MailBuilder from './MailBuilder';
 export default {
     name: "SendEmail",
     components: {MailBuilder},
-    props: {
-        from: {
-            required: true,
-            type: Array,
-            default: () => []
-        }
-    },
     data() {
         return {
             showForm: false,
@@ -123,6 +116,7 @@ export default {
             this.$httpBasic.post('/mail/send', formData, {name: 'sending-email', headers: {'Content-Type': 'multipart/form-data'}})
                 .then(response => {
                     this.$notify.success('Email sent');
+                    this.$emit('sent');
                 })
                 .catch(error => this.$notify.alert('Email was not sent: ' + error.message));
         },
@@ -132,7 +126,7 @@ export default {
     },
     computed: {
         resendId() {
-            let resendId = Object.fromEntries(new URLSearchParams(window.location.search).entries()).resendId;
+            let resendId = Object.fromEntries(new URLSearchParams(window.location.search).entries()).resend_id;
             if(resendId) {
                 resendId = Number(resendId);
             }

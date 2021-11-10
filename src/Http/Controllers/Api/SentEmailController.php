@@ -23,7 +23,13 @@ class SentEmailController extends Controller
             ->whereIn('from_id', $accessibleEmailIds)
             ->get()
             ->map(function(SentMail $sentMail) {
+                $retries = $sentMail->retries->map(function(SentMail $sentMail) {
+                    $array = $sentMail->toArray();
+                    $array['preview'] = $sentMail->asMailable()->render();
+                    return $array;
+                });
                 $array = $sentMail->toArray();
+                $array['retries'] = $retries;
                 $array['preview'] = $sentMail->asMailable()->render();
                 return $array;
             });
@@ -35,7 +41,13 @@ class SentEmailController extends Controller
 
         abort_unless($sentMail->from->currentUserCanAccess(), 403, 'You do not have permission to see this mail');
 
+        $retries = $sentMail->retries->map(function(SentMail $sentMail) {
+            $array = $sentMail->toArray();
+            $array['preview'] = $sentMail->asMailable()->render();
+            return $array;
+        });
         $array = $sentMail->toArray();
+        $array['retries'] = $retries;
         $array['preview'] = $sentMail->asMailable()->render();
 
         return response()->json($array, 200);

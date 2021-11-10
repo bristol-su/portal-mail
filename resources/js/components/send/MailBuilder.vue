@@ -17,11 +17,6 @@ export default {
             required: true,
             type: Object
         },
-        from: {
-            required: true,
-            type: Array,
-            default: () => []
-        },
         resendId: {
             required: false,
             type: Number
@@ -35,8 +30,14 @@ export default {
     data() {
         return {
             alternativeContent: null,
-            alternativeContentType: 'html'
+            alternativeContentType: 'html',
+            from: []
         }
+    },
+    created() {
+        this.$httpBasic.get('/mail/user/address')
+            .then(response => this.from = response.data)
+            .catch(error => this.$notify.alert('Could not get available from emails: ' + error.message));
     },
     computed: {
 
@@ -214,7 +215,7 @@ export default {
                     .required(false)
                     .value(this.data.existing_attachments)
                     .setOptions(this.uploadedAttachments.map(a => {
-                        return {id: a.id, value: a.value};
+                        return {id: a.id, text: a.filename};
                     }))
                 );
             }

@@ -29,28 +29,12 @@
             </template>
         </p-table>
 
-        <h1>Domains</h1>
-
-        <p-table
-            :busy="$isLoading('get-domains')"
-            :columns="domainFields"
-            :items="domains"
-            :viewable="true"
-            @view="viewDomain">
-        </p-table>
-
         <p-modal id="add-email" title="Add email address">
             <add-address @added="addEmail">
 
             </add-address>
         </p-modal>
 
-        <p-modal id="view-cname" title="View DNS Records" @hide="viewingDomain = null">
-            The following CNAME records should be created for the domain {{viewingDomain ? viewingDomain.domain : 'N/A'}}
-            <p-table v-if="viewingDomain" :columns="viewingDomainFields" :items="getDnsDetails(viewingDomain.dns_records)">
-
-            </p-table>
-        </p-modal>
     </div>
 </template>
 
@@ -73,22 +57,9 @@ export default {
                 {key: 'name', label: 'Name'},
                 {key: 'status', label: 'Status'},
             ],
-            domainFields: [
-                {key: 'domain', label: 'Domain'},
-                {key: 'status', label: 'Status'}
-            ],
-            viewingDomainFields: [
-                {key: 'name', label: 'CNAME Name'},
-                {key: 'value', label: 'CNAME Value'}
-            ],
             newEmails: [],
             removedEmails: [],
-            domains: [],
-            viewingDomain: null
         }
-    },
-    mounted() {
-        this.refreshDomains();
     },
     methods: {
         deleteAddress(address) {
@@ -105,7 +76,7 @@ export default {
         addEmail(email) {
             this.newEmails.push(email);
             this.$ui.modal.hide('add-email');
-            this.refreshDomains();
+            this.$emit('emailadded');
         },
         verifyEmail(address) {
             this.$httpBasic.post('/mail/address/' + address.id + '/verification')

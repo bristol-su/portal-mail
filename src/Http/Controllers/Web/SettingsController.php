@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class UserController
+class SettingsController
 {
     use AuthorizesRequests;
 
@@ -25,8 +25,9 @@ class UserController
             $users->push($user);
         }
 
-        return view('portal-mail::users', [
-            'users' => $users
+        return view('portal-mail::settings', [
+            'users' => $users,
+            'emails' => EmailAddress::all()
         ]);
     }
 

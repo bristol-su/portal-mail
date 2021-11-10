@@ -2,10 +2,10 @@
 
 namespace BristolSU\Mail\Http\Controllers\Web;
 
-use BristolSU\Mail\Models\SentMail;
+use BristolSU\Mail\Models\EmailAddress;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
-class SentEmailController
+class MailController
 {
     use AuthorizesRequests;
 
@@ -13,7 +13,7 @@ class SentEmailController
     {
         $this->authorize('view-management');
 
-        return view('portal-mail::sent');
+        return view('portal-mail::mail');
     }
 
 }
