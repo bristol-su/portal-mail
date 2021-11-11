@@ -13,17 +13,14 @@ class SendEmailJob
 
     public EmailPayload $payload;
 
-    private ?SentMail $sentMail;
-
     /**
      * Create a new job instance.
      *
      * @param EmailPayload $payload
      */
-    public function __construct(EmailPayload $payload, ?SentMail $sentMail = null)
+    public function __construct(EmailPayload $payload)
     {
         $this->payload = $payload;
-        $this->sentMail = $sentMail;
     }
 
     /**

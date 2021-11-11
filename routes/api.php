@@ -9,4 +9,3 @@ Route::post('address/{emailAddress}/verification', [\BristolSU\Mail\Http\Control
 Route::post('send', [\BristolSU\Mail\Http\Controllers\Api\SendEmailController::class, 'send'])->name('portal_mail.send');
 Route::get('domains', [\BristolSU\Mail\Http\Controllers\Api\DomainController::class, 'index']);
 Route::apiResource('sent', \BristolSU\Mail\Http\Controllers\Api\SentEmailController::class)->only(['index', 'show'])->parameters(['sent' => 'sentMail']);
-Route::post('sent/{sentMail}/resend/', [\BristolSU\Mail\Http\Controllers\Api\ResendSentEmailController::class, 'resend']);
