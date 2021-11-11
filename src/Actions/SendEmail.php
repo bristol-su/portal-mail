@@ -161,12 +161,12 @@ class SendEmail extends Action
         $payload->setSentVia('action');
         $payload->setNotes($this->option('notes'));
         $payload->setSubject($this->option('subject'));
-        $payload->setBcc($this->option('bcc', ''));
-        $payload->setCc($this->option('cc', ''));
+        $payload->setBcc($this->option('bcc', []));
+        $payload->setCc($this->option('cc', []));
         $payload->setPriority($this->option('priority', null));
         $payload->setReplyTo($this->option('reply_to', null));
 
-        $files = array_filter($this->option('attachments', ''));
+        $files = array_filter($this->option('attachments', []));
         if (!empty($files)) {
             $attachments = new UploadAttachments($files);
             $attachments->upload();
