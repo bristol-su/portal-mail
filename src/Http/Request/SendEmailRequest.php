@@ -11,6 +11,7 @@ use BristolSU\Mail\Ses\Ses;
 use BristolSU\Support\Authentication\Contracts\Authentication;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Fluent;
 use Illuminate\Support\Str;
@@ -92,14 +93,26 @@ class SendEmailRequest extends FormRequest
     {
         $contentIsArray = fn(Fluent $input) => is_array($input->get('content'));
         $actionIsGiven = fn(Fluent $input) => array_key_exists('action', $input->get('content', [])) && is_array($input->get('content', [])['action']);
+        $beforeIsArray = fn(Fluent $input) => array_key_exists('before_lines', $input->get('content', [])) && is_array($input->get('content', [])['before_lines']);
+        $afterIsArray = fn(Fluent $input) => array_key_exists('after_lines', $input->get('content', [])) && is_array($input->get('content', [])['after_lines']);
+
         $validator->sometimes('content', 'string|max:9000000', fn(Fluent $input) => is_string($input->get('content')));
+
         $validator->sometimes('content', 'array', $contentIsArray);
         $validator->sometimes('content.greeting', 'sometimes|string|max:255', $contentIsArray);
         $validator->sometimes('content.salutation', 'sometimes|string|max:255', $contentIsArray);
-        $validator->sometimes('content.before_lines', 'sometimes|array', $contentIsArray);
-        $validator->sometimes('content.before_lines.*', 'string', $contentIsArray);
-        $validator->sometimes('content.after_lines', 'sometimes|array', $contentIsArray);
-        $validator->sometimes('content.after_lines.*', 'string', $contentIsArray);
+        $validator->sometimes('content.before_lines', ['sometimes', 'array', function($attribute, $value, $fail) {
+            if(!is_string($value) && !is_array($value)) {
+                $fail('The ' . $attribute . ' value must be an array or a string.');
+            }
+        }], $contentIsArray);
+        $validator->sometimes('content.before_lines.*', 'string', fn(Fluent $input) => $contentIsArray && $beforeIsArray);
+        $validator->sometimes('content.after_lines', ['sometimes', 'array', function($attribute, $value, $fail) {
+            if(!is_string($value) && !is_array($value)) {
+                $fail('The ' . $attribute . ' value must be an array or a string.');
+            }
+        }], $contentIsArray);
+        $validator->sometimes('content.after_lines.*', 'string', fn(Fluent $input) => $contentIsArray && $beforeIsArray);
         $validator->sometimes('content.action', 'sometimes|array', $contentIsArray);
         $validator->sometimes('content.action.text', 'required|string', fn(Fluent $input) => $contentIsArray($input) && $actionIsGiven($input));
         $validator->sometimes('content.action.url', 'required|url', fn(Fluent $input) => $contentIsArray($input) && $actionIsGiven($input));
@@ -111,7 +124,11 @@ class SendEmailRequest extends FormRequest
         $data = $this->validated();
 
         $email = EmailAddress::findOrFail(data_get($data, 'from_id'));
-        $payload = (new EmailPayload(data_get($data, 'content'), data_get($data, 'to'), $email))
+        $payload = (new EmailPayload(
+            $this->prepareContentForPayload(data_get($data, 'content')),
+            data_get($data, 'to'),
+            $email
+        ))
             ->setSubject(data_get($data, 'subject'))
             ->setCc(data_get($data, 'cc') ?? [])
             ->setBcc(data_get($data, 'bcc') ?? [])
@@ -128,6 +145,21 @@ class SendEmailRequest extends FormRequest
         }
 
         return $this->uploadFiles($payload, $existingAttachments);
+    }
+
+    private function prepareContentForPayload($content)
+    {
+        if(is_string($content)) {
+            return $content;
+        }
+
+        if(array_key_exists('before_lines', $content) && is_string($content['before_lines'])) {
+            $content['before_lines'] = Arr::wrap($content['before_lines']);
+        }
+        if(array_key_exists('after_lines', $content) && is_string($content['after_lines'])) {
+            $content['after_lines'] = Arr::wrap($content['after_lines']);
+        }
+        return $content;
     }
 
     private function uploadFiles(EmailPayload $payload, array $existingAttachments): EmailPayload
