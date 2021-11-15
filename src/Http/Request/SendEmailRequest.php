@@ -101,18 +101,18 @@ class SendEmailRequest extends FormRequest
         $validator->sometimes('content', 'array', $contentIsArray);
         $validator->sometimes('content.greeting', 'sometimes|string|max:255', $contentIsArray);
         $validator->sometimes('content.salutation', 'sometimes|string|max:255', $contentIsArray);
-        $validator->sometimes('content.before_lines', ['sometimes', 'array', function($attribute, $value, $fail) {
+        $validator->sometimes('content.before_lines', ['sometimes', function($attribute, $value, $fail) {
             if(!is_string($value) && !is_array($value)) {
                 $fail('The ' . $attribute . ' value must be an array or a string.');
             }
         }], $contentIsArray);
         $validator->sometimes('content.before_lines.*', 'string', fn(Fluent $input) => $contentIsArray && $beforeIsArray);
-        $validator->sometimes('content.after_lines', ['sometimes', 'array', function($attribute, $value, $fail) {
+        $validator->sometimes('content.after_lines', ['sometimes', function($attribute, $value, $fail) {
             if(!is_string($value) && !is_array($value)) {
                 $fail('The ' . $attribute . ' value must be an array or a string.');
             }
         }], $contentIsArray);
-        $validator->sometimes('content.after_lines.*', 'string', fn(Fluent $input) => $contentIsArray && $beforeIsArray);
+        $validator->sometimes('content.after_lines.*', 'string', fn(Fluent $input) => $contentIsArray && $afterIsArray);
         $validator->sometimes('content.action', 'sometimes|array', $contentIsArray);
         $validator->sometimes('content.action.text', 'required|string', fn(Fluent $input) => $contentIsArray($input) && $actionIsGiven($input));
         $validator->sometimes('content.action.url', 'required|url', fn(Fluent $input) => $contentIsArray($input) && $actionIsGiven($input));
