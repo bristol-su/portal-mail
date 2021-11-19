@@ -1,22 +1,22 @@
 <template>
 
         <p-tabs ref="tabs">
-            <p-tab title="Sent Mail" :keep-alive="true">
-                <view-sent status="Sent">
+            <p-tab title="Sent Mail" :badge="sentCount" :keep-alive="true" icon="fas fa-inbox">
+                <view-sent status="sent" @updateCount="sentCount = $event">
 
                 </view-sent>
             </p-tab>
-            <p-tab title="Failed Messages" :keep-alive="true">
-                <view-sent status="Failed">
+            <p-tab title="Failed Messages" :badge="failedCount" :keep-alive="true" icon="fa-solid fa-triangle-exclamation">
+                <view-sent status="failed" @updateCount="failedCount = $event">
 
                 </view-sent>
             </p-tab>
-            <p-tab title="Outbox" :keep-alive="true">
-                <view-sent status="Pending">
+            <p-tab title="Outbox" :badge="outboxCount" :keep-alive="true" icon="fas fa-rocket">
+                <view-sent status="pending" @updateCount="outboxCount = $event">
 
                 </view-sent>
             </p-tab>
-            <p-tab title="New Message" :keep-alive="true">
+            <p-tab title="New Message" :keep-alive="true" icon="fa-solid fa-paper-plane">
                 <send-email @sent="sent">
 
                 </send-email>
@@ -37,6 +37,13 @@ export default {
     mounted() {
         if(Object.fromEntries(new URLSearchParams(window.location.search).entries()).resend_id) {
             this.$nextTick(() => this.$refs.tabs.selectTab(3));
+        }
+    },
+    data() {
+        return {
+            outboxCount: null,
+            failedCount: null,
+            sentCount: null
         }
     },
     methods: {

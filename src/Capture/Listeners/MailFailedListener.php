@@ -5,6 +5,7 @@ namespace BristolSU\Mail\Capture\Listeners;
 use Aws\Ses\Exception\SesException;
 use BristolSU\Mail\Capture\Events\MessageFailed;
 use BristolSU\Mail\Models\SentMail;
+use Carbon\Carbon;
 use Exception;
 
 class MailFailedListener
@@ -16,6 +17,7 @@ class MailFailedListener
             SentMail::where('uuid', $event->data['__bristol_su_mail_uuid'])->update([
                 'is_sent' => false,
                 'is_error' => true,
+                'failed_at' => Carbon::now(),
                 'error_message' => $this->getMessageFromException($event->exception)
             ]);
         }

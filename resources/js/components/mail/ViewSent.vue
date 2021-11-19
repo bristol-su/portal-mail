@@ -1,25 +1,30 @@
 <template>
     <div>
 
-        <p-list-preview :list-items="sentMessageItems" :active-item="this.viewingMessage ? this.viewingMessage.id : null" @change="viewMessage">
+        <p-list-preview
+            :list-items="sentMessageItems"
+            :active-item="this.viewingMessage ? this.viewingMessage.id : null"
+            @change="viewMessage"
+            @nextPage="page = page + 1"
+            :loading="$isLoading('get-mail-' + status)"
+            :load-more="this.totalPages === null || this.loadedPages.length < this.totalPages">
             <template #topbar>
-                <a href="#" @click="loadMessages()" @keydown.space.prevent="loadMessages()" @keydown.enter.prevent="loadMessages()" class="text-primary hover:text-primary-dark">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                <a href="#" @click="reloadMessages()" @keydown.space.prevent="reloadMessages()"
+                   @keydown.enter.prevent="reloadMessages()" class="text-primary hover:text-primary-dark">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor"
                          content="Check for new messages"
                          v-tippy="{ arrow: true, animation: 'fade', placement: 'top-start', arrow: true, interactive: true}">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                     </svg>
                     <span class="sr-only">Check for new messages</span>
                 </a>
             </template>
 
-            <view-message :message="viewingMessage" v-if="viewingMessage !== null" @viewRetry="viewRetry">
+            <view-message :message="viewingMessage" v-if="viewingMessage !== null">
 
             </view-message>
-
-            <template #footer>
-            Footer
-            </template>
         </p-list-preview>
 
     </div>
@@ -51,41 +56,68 @@ export default {
             ],
             viewingMessage: null,
             sent: [],
-            viewingRetry: null
+            loadedPages: [],
+            page: 1,
+            totalPages: null
         }
     },
     created() {
         return this.loadMessages();
     },
+    watch: {
+        page(page) {
+            if (page < 1) {
+                this.page = 1;
+            } else if (page > this.totalPages ?? 0) {
+                this.page = this.totalPages ?? 0;
+            } else {
+                this.loadMessages();
+            }
+        }
+    },
     methods: {
-        viewRetry(retry) {
-            this.viewingRetry = retry;
-        },
         loadMessages() {
-            this.$httpBasic.get('/mail/sent', {name: 'get-mail'})
-                .then(response => this.sent = response.data)
+            let url = '/mail/sent?page=' + this.page;
+            if (this.status !== null) {
+                url = url + '&status=' + this.status;
+            }
+            this.$httpBasic.get(url, {name: 'get-mail-' + this.status})
+                .then(response => {
+                    (response.data.data ?? []).forEach((mail) => {
+                        if(this.sent.filter(s => s.id === mail.id).length === 0) {
+                            this.sent.push(mail);
+                        }
+                    })
+                    this.sent = this.sent.concat();
+                    this.totalPages = response.data.last_page;
+                    this.$emit('updateCount', response.data.total);
+                    this.loadedPages.push(this.page);
+                })
                 .catch(error => this.$notify.alert('Could not load mailbox: ' + error.message));
+        },
+        reloadMessages() {
+            this.sent = [];
+            this.page = 1;
+            this.loadMessages();
         },
         viewMessage(message) {
             let viewingMessage = this.sent.filter(sent => sent.id === message.id);
-            if(viewingMessage.length === 1) {
+            if (viewingMessage.length === 1) {
                 this.viewingMessage = viewingMessage[0];
             }
         }
     },
     computed: {
         sentMessageItems() {
-            return this.sent
-                .filter(sent => this.status === null || sent.status === this.status)
-                .map(sent => {
-                    return {
-                        id: sent.id,
-                        title: sent.to.join(', '),
-                        subtitle: sent.from?.email,
-                        body: sent.subject,
-                        note: 'From: ' + (sent.sent_at === null ? moment(sent.updated_at).fromNow() : moment(sent.sent_at).fromNow()),
-                    }
-                })
+            return this.sent.map(sent => {
+                return {
+                    id: sent.id,
+                    title: (sent.to ?? []).join(', '),
+                    subtitle: 'From: ' + sent.from?.email,
+                    body: sent.subject,
+                    note: (sent.sent_at === null ? moment(sent.updated_at).fromNow() : moment(sent.sent_at).fromNow()),
+                }
+            })
         }
     }
 }

@@ -5,6 +5,8 @@ namespace BristolSU\Mail\Models;
 use BristolSU\Mail\Mail\EmailPayload;
 use BristolSU\Mail\Mail\GenericMailable;
 use BristolSU\Mail\Models\EmailAddress;
+use BristolSU\Support\Authentication\Contracts\Authentication;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Mail;
 
@@ -20,7 +22,8 @@ class SentMail extends Model
         'is_sent' => 'boolean',
         'is_error' => 'boolean',
         'sent_at' => 'datetime',
-        'priority' => 'integer'
+        'priority' => 'integer',
+        'failed_at' => 'datetime'
     ];
 
     protected $with = [
@@ -28,7 +31,7 @@ class SentMail extends Model
     ];
 
     protected $appends = [
-        'status'
+        'status', 'preview'
     ];
 
     protected $fillable = [
@@ -48,7 +51,8 @@ class SentMail extends Model
         'sent_at',
         'priority',
         'reply_to',
-        'resend_id'
+        'resend_id',
+        'failed_at'
     ];
 
     public function getStatusAttribute(): string
@@ -64,6 +68,54 @@ class SentMail extends Model
             return 'Sent';
         }
         return 'Pending';
+    }
+
+    public function scopeWithFromId(Builder $query, array $fromIds = [])
+    {
+        $query->whereIn('from_id', $fromIds);
+    }
+
+    public function scopeAccessibleByCurrentUser(Builder $query)
+    {
+        $ids = EmailAddress::forUser(app(Authentication::class)->getUser())->get()->pluck('id')->toArray();
+        $query->whereIn('from_id', $ids);
+    }
+
+    /**
+     * A message is true if it either has is_sent as true, or a successful retry
+     *
+     * @param Builder $query
+     */
+    public function scopeSent(Builder $query)
+    {
+        $query->where('is_sent', true)
+            ->orWhereHas('successfulRetries');
+    }
+
+    /**
+     * A message has failed if is_error is true and, if resend_id is null it can't have any successful retries
+     *
+     * @param Builder $query
+     */
+    public function scopeFailed(Builder $query)
+    {
+        $query->where('is_error', true)
+            ->whereDoesntHave('successfulRetries');
+    }
+
+    /**
+     * A message is pending if is_error is false and is_sent is false
+     *
+     * @param Builder $query
+     */
+    public function scopePending(Builder $query)
+    {
+        $query->where('is_error', false)->where('is_sent', false);
+    }
+
+    public function successfulRetries()
+    {
+        return $this->retries()->where('is_sent', true);
     }
 
     public function getContentAttribute($value)
@@ -100,6 +152,11 @@ class SentMail extends Model
     public function parentEmail()
     {
         return $this->belongsTo(SentMail::class, 'resend_id');
+    }
+
+    public function getPreviewAttribute()
+    {
+        return $this->asMailable()->render();
     }
 
     protected static function booted()

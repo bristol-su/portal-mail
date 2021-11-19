@@ -140,6 +140,13 @@ __webpack_require__.r(__webpack_exports__);
       });
     }
   },
+  data: function data() {
+    return {
+      outboxCount: null,
+      failedCount: null,
+      sentCount: null
+    };
+  },
   methods: {
     sent: function sent() {}
   }
@@ -792,6 +799,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -823,26 +835,65 @@ __webpack_require__.r(__webpack_exports__);
       }],
       viewingMessage: null,
       sent: [],
-      viewingRetry: null
+      loadedPages: [],
+      page: 1,
+      totalPages: null
     };
   },
   created: function created() {
     return this.loadMessages();
   },
+  watch: {
+    page: function page(_page) {
+      var _ref;
+
+      if (_page < 1) {
+        this.page = 1;
+      } else if ((_ref = _page > this.totalPages) !== null && _ref !== void 0 ? _ref : 0) {
+        var _this$totalPages;
+
+        this.page = (_this$totalPages = this.totalPages) !== null && _this$totalPages !== void 0 ? _this$totalPages : 0;
+      } else {
+        this.loadMessages();
+      }
+    }
+  },
   methods: {
-    viewRetry: function viewRetry(retry) {
-      this.viewingRetry = retry;
-    },
     loadMessages: function loadMessages() {
       var _this = this;
 
-      this.$httpBasic.get('/mail/sent', {
-        name: 'get-mail'
+      var url = '/mail/sent?page=' + this.page;
+
+      if (this.status !== null) {
+        url = url + '&status=' + this.status;
+      }
+
+      this.$httpBasic.get(url, {
+        name: 'get-mail-' + this.status
       }).then(function (response) {
-        return _this.sent = response.data;
+        var _response$data$data;
+
+        ((_response$data$data = response.data.data) !== null && _response$data$data !== void 0 ? _response$data$data : []).forEach(function (mail) {
+          if (_this.sent.filter(function (s) {
+            return s.id === mail.id;
+          }).length === 0) {
+            _this.sent.push(mail);
+          }
+        });
+        _this.sent = _this.sent.concat();
+        _this.totalPages = response.data.last_page;
+
+        _this.$emit('updateCount', response.data.total);
+
+        _this.loadedPages.push(_this.page);
       })["catch"](function (error) {
         return _this.$notify.alert('Could not load mailbox: ' + error.message);
       });
+    },
+    reloadMessages: function reloadMessages() {
+      this.sent = [];
+      this.page = 1;
+      this.loadMessages();
     },
     viewMessage: function viewMessage(message) {
       var viewingMessage = this.sent.filter(function (sent) {
@@ -856,19 +907,15 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {
     sentMessageItems: function sentMessageItems() {
-      var _this2 = this;
-
-      return this.sent.filter(function (sent) {
-        return _this2.status === null || sent.status === _this2.status;
-      }).map(function (sent) {
-        var _sent$from;
+      return this.sent.map(function (sent) {
+        var _sent$to, _sent$from;
 
         return {
           id: sent.id,
-          title: sent.to.join(', '),
-          subtitle: (_sent$from = sent.from) === null || _sent$from === void 0 ? void 0 : _sent$from.email,
+          title: ((_sent$to = sent.to) !== null && _sent$to !== void 0 ? _sent$to : []).join(', '),
+          subtitle: 'From: ' + ((_sent$from = sent.from) === null || _sent$from === void 0 ? void 0 : _sent$from.email),
           body: sent.subject,
-          note: 'From: ' + (sent.sent_at === null ? moment__WEBPACK_IMPORTED_MODULE_1___default()(sent.updated_at).fromNow() : moment__WEBPACK_IMPORTED_MODULE_1___default()(sent.sent_at).fromNow())
+          note: sent.sent_at === null ? moment__WEBPACK_IMPORTED_MODULE_1___default()(sent.updated_at).fromNow() : moment__WEBPACK_IMPORTED_MODULE_1___default()(sent.sent_at).fromNow()
         };
       });
     }
@@ -1117,11 +1164,23 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       var data = this.newMail;
       var formData = new FormData();
       formData.append('from_id', data.from_id);
-      formData.append('subject', data.subject);
-      formData.append('notes', data.notes);
       formData.append('via', 'inbox');
-      formData.append('reply_to', data.reply_to);
-      formData.append('priority', data.priority);
+
+      if (data.subject) {
+        formData.append('subject', data.subject);
+      }
+
+      if (data.notes) {
+        formData.append('notes', data.notes);
+      }
+
+      if (data.reply_to) {
+        formData.append('reply_to', data.reply_to);
+      }
+
+      if (data.priority) {
+        formData.append('priority', data.priority);
+      }
 
       var _iterator = _createForOfIteratorHelper(data.attachments),
           _step;
@@ -23842,28 +23901,82 @@ var render = function () {
     [
       _c(
         "p-tab",
-        { attrs: { title: "Sent Mail", "keep-alive": true } },
-        [_c("view-sent", { attrs: { status: "Sent" } })],
+        {
+          attrs: {
+            title: "Sent Mail",
+            badge: _vm.sentCount,
+            "keep-alive": true,
+            icon: "fas fa-inbox",
+          },
+        },
+        [
+          _c("view-sent", {
+            attrs: { status: "sent" },
+            on: {
+              updateCount: function ($event) {
+                _vm.sentCount = $event
+              },
+            },
+          }),
+        ],
         1
       ),
       _vm._v(" "),
       _c(
         "p-tab",
-        { attrs: { title: "Failed Messages", "keep-alive": true } },
-        [_c("view-sent", { attrs: { status: "Failed" } })],
+        {
+          attrs: {
+            title: "Failed Messages",
+            badge: _vm.failedCount,
+            "keep-alive": true,
+            icon: "fa-solid fa-triangle-exclamation",
+          },
+        },
+        [
+          _c("view-sent", {
+            attrs: { status: "failed" },
+            on: {
+              updateCount: function ($event) {
+                _vm.failedCount = $event
+              },
+            },
+          }),
+        ],
         1
       ),
       _vm._v(" "),
       _c(
         "p-tab",
-        { attrs: { title: "Outbox", "keep-alive": true } },
-        [_c("view-sent", { attrs: { status: "Pending" } })],
+        {
+          attrs: {
+            title: "Outbox",
+            badge: _vm.outboxCount,
+            "keep-alive": true,
+            icon: "fas fa-rocket",
+          },
+        },
+        [
+          _c("view-sent", {
+            attrs: { status: "pending" },
+            on: {
+              updateCount: function ($event) {
+                _vm.outboxCount = $event
+              },
+            },
+          }),
+        ],
         1
       ),
       _vm._v(" "),
       _c(
         "p-tab",
-        { attrs: { title: "New Message", "keep-alive": true } },
+        {
+          attrs: {
+            title: "New Message",
+            "keep-alive": true,
+            icon: "fa-solid fa-paper-plane",
+          },
+        },
         [_c("send-email", { on: { sent: _vm.sent } })],
         1
       ),
@@ -24613,8 +24726,17 @@ var render = function () {
           attrs: {
             "list-items": _vm.sentMessageItems,
             "active-item": this.viewingMessage ? this.viewingMessage.id : null,
+            loading: _vm.$isLoading("get-mail-" + _vm.status),
+            "load-more":
+              this.totalPages === null ||
+              this.loadedPages.length < this.totalPages,
           },
-          on: { change: _vm.viewMessage },
+          on: {
+            change: _vm.viewMessage,
+            nextPage: function ($event) {
+              _vm.page = _vm.page + 1
+            },
+          },
           scopedSlots: _vm._u([
             {
               key: "topbar",
@@ -24627,7 +24749,7 @@ var render = function () {
                       attrs: { href: "#" },
                       on: {
                         click: function ($event) {
-                          return _vm.loadMessages()
+                          return _vm.reloadMessages()
                         },
                         keydown: [
                           function ($event) {
@@ -24641,7 +24763,7 @@ var render = function () {
                               return null
                             }
                             $event.preventDefault()
-                            return _vm.loadMessages()
+                            return _vm.reloadMessages()
                           },
                           function ($event) {
                             if (
@@ -24657,7 +24779,7 @@ var render = function () {
                               return null
                             }
                             $event.preventDefault()
-                            return _vm.loadMessages()
+                            return _vm.reloadMessages()
                           },
                         ],
                       },
@@ -24711,22 +24833,12 @@ var render = function () {
               },
               proxy: true,
             },
-            {
-              key: "footer",
-              fn: function () {
-                return [_vm._v("\n        Footer\n        ")]
-              },
-              proxy: true,
-            },
           ]),
         },
         [
           _vm._v(" "),
           _vm.viewingMessage !== null
-            ? _c("view-message", {
-                attrs: { message: _vm.viewingMessage },
-                on: { viewRetry: _vm.viewRetry },
-              })
+            ? _c("view-message", { attrs: { message: _vm.viewingMessage } })
             : _vm._e(),
         ],
         1

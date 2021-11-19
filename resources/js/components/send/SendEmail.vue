@@ -62,11 +62,19 @@ export default {
             let data = this.newMail;
             let formData = new FormData();
             formData.append('from_id', data.from_id);
-            formData.append('subject', data.subject);
-            formData.append('notes', data.notes);
             formData.append('via', 'inbox');
-            formData.append('reply_to', data.reply_to);
-            formData.append('priority', data.priority);
+            if(data.subject) {
+                formData.append('subject', data.subject);
+            }
+            if(data.notes) {
+                formData.append('notes', data.notes);
+            }
+            if(data.reply_to) {
+                formData.append('reply_to', data.reply_to);
+            }
+            if(data.priority) {
+                formData.append('priority', data.priority);
+            }
 
             for (let attachment of data.attachments) {
                 formData.append('attachments[]', attachment)
