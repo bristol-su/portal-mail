@@ -31,7 +31,6 @@ class SendEmailJob implements ShouldQueue
      */
     public function handle(Mailer $mailer)
     {
-        \Log::info(get_class($mailer));
         $mailer->send(
             GenericMailable::forPayload($this->payload)
         );

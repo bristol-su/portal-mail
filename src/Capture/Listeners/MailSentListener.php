@@ -28,6 +28,8 @@ class MailSentListener
             } else {
                 Log::info('Mail sent without recording the information. ' . json_encode($event->data));
             }
+        } else {
+            Log::info('Mail sent without recording the information dur to missing uuid. ' . json_encode($event->data));
         }
     }
 
