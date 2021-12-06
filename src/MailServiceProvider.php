@@ -84,11 +84,11 @@ class MailServiceProvider extends ServiceProvider
             return $app->make(MailManager::class, ['mailer' => $mailer]);
         });
 
-        $existingCallback = Mailable::$viewDataCallback;
 
-        Mailable::buildViewDataUsing(function (Mailable $mailable) use ( $existingCallback ) {
+        Mailable::buildViewDataUsing(function (Mailable $mailable) {
+            $existingCallback = Mailable::$viewDataCallback;
             $existingData = $existingCallback ? call_user_func( $existingCallback, $mailable ) : [];
-
+\Log::info('Called for payload: ' . json_encode($mailable->payload()));
             return array_merge(
                 is_array($existingData) ? $existingData : [],
                 $mailable instanceof IsRecorded ? ['__bristol_su_mail_payload' => $mailable->payload()] : [],
