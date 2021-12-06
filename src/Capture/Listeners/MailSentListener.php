@@ -13,7 +13,7 @@ class MailSentListener
     public function handle(MessageSent $event)
     {
         if (isset($event->data['__bristol_su_mail_uuid'])) {
-            $sentMail = SentMail::where('uuid', $event->data['__bristol_su_mail_uuid'])->find();
+            $sentMail = SentMail::where('uuid', $event->data['__bristol_su_mail_uuid'])->first();
             if($sentMail) {
                 $sentMail->fill([
                     'is_sent' => true,
