@@ -4,10 +4,11 @@ namespace BristolSU\Mail\Mail;
 
 use BristolSU\Mail\Models\SentMail;
 use Illuminate\Contracts\Mail\Mailer;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 
-class SendEmailJob
+class SendEmailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue;
 

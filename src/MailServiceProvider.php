@@ -80,7 +80,6 @@ class MailServiceProvider extends ServiceProvider
         $this->app['events']->listen(MessageFailed::class, MailFailedListener::class);
         $this->app['events']->listen(fn(\BristolSU\ControlDB\Events\User\UserDeleted $event) => EmailAddressUser::where('user_id', $event->user->id())->delete());
 
-
         $this->app->extend('mail.manager', function(Factory $mailer, $app) {
             return $app->make(MailManager::class, ['mailer' => $mailer]);
         });
