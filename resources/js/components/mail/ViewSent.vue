@@ -25,6 +25,20 @@
             <view-message :message="viewingMessage" v-if="viewingMessage !== null">
 
             </view-message>
+            <div v-else>
+                <p>No message selected.</p>
+
+                <div v-if="enabledAddresses.length > 0">
+                    You have access to see messages sent from the following mailboxes
+                    <ul class="list-disc">
+                        <li v-for="address in enabledAddresses">{{address.name}} <{{address.email}}></li>
+                    </ul>
+                </div>
+
+                <div v-else>
+                    You either don't have access to any mailboxes, or these email addresses have not been verified.
+                </div>
+            </div>
         </p-list-preview>
 
     </div>
@@ -44,6 +58,11 @@ export default {
             required: false,
             type: String,
             default: null
+        },
+        enabledAddresses: {
+            required: false,
+            type: Array,
+            default: () => []
         }
     },
     data() {
@@ -62,7 +81,7 @@ export default {
         }
     },
     created() {
-        return this.loadMessages();
+        this.loadMessages();
     },
     watch: {
         page(page) {

@@ -1,18 +1,19 @@
 <template>
 
+    <div>
         <p-tabs ref="tabs">
             <p-tab title="Sent Mail" :badge="sentCount" :keep-alive="true" icon="fas fa-inbox">
-                <view-sent status="sent" @updateCount="sentCount = $event">
+                <view-sent status="sent" @updateCount="sentCount = $event" :enabled-addresses="enabledAddresses">
 
                 </view-sent>
             </p-tab>
             <p-tab title="Failed Messages" :badge="failedCount" :keep-alive="true" icon="fa-solid fa-triangle-exclamation">
-                <view-sent status="failed" @updateCount="failedCount = $event">
+                <view-sent status="failed" @updateCount="failedCount = $event" :enabled-addresses="enabledAddresses">
 
                 </view-sent>
             </p-tab>
             <p-tab title="Outbox" :badge="outboxCount" :keep-alive="true" icon="fas fa-rocket">
-                <view-sent status="pending" @updateCount="outboxCount = $event">
+                <view-sent status="pending" @updateCount="outboxCount = $event" :enabled-addresses="enabledAddresses">
 
                 </view-sent>
             </p-tab>
@@ -22,6 +23,7 @@
                 </send-email>
             </p-tab>
         </p-tabs>
+    </div>
 
 </template>
 
@@ -33,6 +35,13 @@ export default {
     name: "Mail",
     components: {
         ViewSent, SendEmail
+    },
+    props: {
+        enabledAddresses: {
+            required: false,
+            default: () => [],
+            type: Array
+        }
     },
     mounted() {
         if(Object.fromEntries(new URLSearchParams(window.location.search).entries()).resend_id) {

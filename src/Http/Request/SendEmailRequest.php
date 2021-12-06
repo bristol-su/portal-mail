@@ -66,8 +66,6 @@ class SendEmailRequest extends FormRequest
                 $attachment = Attachment::find($value);
                 if($attachment === null) {
                     $fail('The attachment id could not be found');
-                } elseif($attachment->resend_id !== null) {
-                    $fail('You cannot resend a retry of an email. Please retry the original email.');
                 }
             }],
             'resend_id' => ['sometimes', 'integer', function ($attribute, $value, $fail) {
