@@ -110,7 +110,8 @@ class SentMail extends Model
      */
     public function scopePending(Builder $query)
     {
-        $query->where('is_error', false)->where('is_sent', false);
+        $query->where('is_error', false)->where('is_sent', false)
+            ->whereDoesntHave('successfulRetries');
     }
 
     public function successfulRetries()

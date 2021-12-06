@@ -1,6 +1,7 @@
 <template>
     <p-form-padding>
-        <mail-builder v-model="newMail" v-if="showForm" :resend-id="resendId" :uploaded-attachments="uploadedAttachments">
+        <mail-builder v-model="newMail" v-if="showForm" :resend-id="resendId"
+                      :uploaded-attachments="uploadedAttachments">
 
         </mail-builder>
 
@@ -34,7 +35,7 @@ export default {
         }
     },
     created() {
-        if(this.resendId) {
+        if (this.resendId) {
             this.$httpBasic.get('/mail/sent/' + this.resendId, {name: 'resent-message'})
                 .then(response => {
                     this.uploadedAttachments = response.data.attachments ?? [];
@@ -63,33 +64,33 @@ export default {
             let formData = new FormData();
             formData.append('from_id', data.from_id);
             formData.append('via', 'inbox');
-            if(data.subject) {
+            if (data.subject) {
                 formData.append('subject', data.subject);
             }
-            if(data.notes) {
+            if (data.notes) {
                 formData.append('notes', data.notes);
             }
-            if(data.reply_to) {
+            if (data.reply_to) {
                 formData.append('reply_to', data.reply_to);
             }
-            if(data.priority) {
+            if (data.priority) {
                 formData.append('priority', data.priority);
             }
 
-            for (let attachment of data.attachments) {
+            for (let attachment of data.attachments ?? []) {
                 formData.append('attachments[]', attachment)
             }
-            for(let e of data.to) {
+            for (let e of data.to ?? []) {
                 formData.append('to[]', e);
             }
-            for(let e of data.cc) {
+            for (let e of data.cc ?? []) {
                 formData.append('cc[]', e);
             }
-            for(let e of data.bcc) {
+            for (let e of data.bcc ?? []) {
                 formData.append('bcc[]', e);
             }
 
-            if((typeof data.content === 'string' || data.content instanceof String )) {
+            if ((typeof data.content === 'string' || data.content instanceof String)) {
                 formData.append('content', data.content);
             } else {
                 let content = data.content ?? {};
@@ -101,27 +102,29 @@ export default {
                 formData.append('content[action][type]', action.type);
                 formData.append('content[salutation]', data.salutation);
 
-                for(let line of content.before_lines) {
+                for (let line of content.before_lines ?? []) {
                     formData.append('content[before_lines][]', line);
                 }
 
-                for(let line of content.after_lines) {
+                for (let line of content.after_lines ?? []) {
                     formData.append('content[after_lines][]', line);
                 }
-
             }
 
-            if(data.existing_attachments && data.existing_attachments.length > 0) {
-                for (let existing_attachments of data.existing_attachments) {
+            if (data.existing_attachments && data.existing_attachments.length > 0) {
+                for (let existing_attachments of data.existing_attachments ?? []) {
                     formData.append('existing_attachments[]', existing_attachments)
                 }
             }
 
-            if(this.resendId) {
+            if (this.resendId) {
                 formData.append('resend_id', this.resendId);
             }
 
-            this.$httpBasic.post('/mail/send', formData, {name: 'sending-email', headers: {'Content-Type': 'multipart/form-data'}})
+            this.$httpBasic.post('/mail/send', formData, {
+                name: 'sending-email',
+                headers: {'Content-Type': 'multipart/form-data'}
+            })
                 .then(response => {
                     this.$notify.success('Email sent');
                     this.$emit('sent');
@@ -135,7 +138,7 @@ export default {
     computed: {
         resendId() {
             let resendId = Object.fromEntries(new URLSearchParams(window.location.search).entries()).resend_id;
-            if(resendId) {
+            if (resendId) {
                 resendId = Number(resendId);
             }
             return resendId;
