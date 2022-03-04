@@ -100,7 +100,7 @@ export default {
                 formData.append('content[action][text]', action.text);
                 formData.append('content[action][url]', action.url);
                 formData.append('content[action][type]', action.type);
-                formData.append('content[salutation]', data.salutation);
+                formData.append('content[salutation]', content.salutation);
 
                 for (let line of content.before_lines ?? []) {
                     formData.append('content[before_lines][]', line);
